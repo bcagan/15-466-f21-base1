@@ -34,6 +34,8 @@ bool AssetAtlas::loadTile(size_t nameSize, char* name, uint64_t* packedTile) {
 	return true;
 }
 
+//@param -in char* packedBackground is the background data that will be stored in the backround, so everything not the tiles
+//This is the char array of references, and can be indexed using the size info and the (to be made) indexing functions
 bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground) {
 	if (bgs == NULL || bgNameList == NULL) return false;
 	if (bgNum == bgs.size()) {
