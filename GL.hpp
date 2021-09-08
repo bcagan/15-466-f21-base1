@@ -16,6 +16,7 @@
  * This file has been automatically generated from glcorearb.h by make-GL.py
  *
  */
+//
 
 void init_GL(); //will throw on failure.
 

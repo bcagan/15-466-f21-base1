@@ -62,12 +62,34 @@ PlayMode::PlayMode() {
 	ppu.tile_table[32].bit1 = {
 		0b00000000,
 		0b00000000,
+		0b00100100,
 		0b00011000,
+		0b00000000,
+		0b01000010,
 		0b00100100,
+		0b01000010,
+	};
+
+	//use sprite 32 as a "player true":
+	ppu.tile_table[33].bit0 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+	};
+	ppu.tile_table[33].bit1 = {
 		0b00000000,
-		0b00100100,
-		0b00000000,
-		0b00000000,
+		0b01111110,
+		0b10111101,
+		0b10111101,
+		0b11011011,
+		0b11011011,
+		0b11100111,
+		0b11100111,
 	};
 
 	//makes the outside of tiles 0-16 solid:
@@ -89,15 +111,15 @@ PlayMode::PlayMode() {
 	//used for the player:
 	ppu.palette_table[7] = {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0xff, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+		glm::u8vec4(0xff, 0x00, 0xff, 0xff),
+		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 	};
 
 	//used for the misc other sprites:
 	ppu.palette_table[6] = {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x88, 0x88, 0xff, 0xff),
+		glm::u8vec4(0xff, 0x00, 0x00, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 	};
@@ -193,7 +215,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//player sprite:
 	ppu.sprites[0].x = int32_t(player_at.x);
 	ppu.sprites[0].y = int32_t(player_at.y);
-	ppu.sprites[0].index = 32;
+	ppu.sprites[0].index = 33;
 	ppu.sprites[0].attributes = 7;
 
 	//some other misc sprites:
