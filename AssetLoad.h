@@ -28,17 +28,7 @@ struct BGAsset {
 class AssetAtlas
 {
 public:
-	AssetAtlas();
-	~AssetAtlas();
-
-	TileRef getRef(size_t nameSize, char* name, std::array< glm::u8vec4, 4> pallet); //Gives ref (or default ref) of desired tile with desired pallet
-	BGAsset getBG(size_t nameSize, char* name); //Searches for an individual background
-
-	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
-
-private:
-
-	TileAsset defaultTile; //In case asset isn't loaded, the defaults will be loaded instead
+	AssetAtlas() = {
 	defaultTile.bit1 = {
 		0b01010101,
 		0b10101010,
@@ -59,7 +49,7 @@ private:
 		0b01010101, };
 	defaultTile.name = "Default";
 	defaultTile.nameSize = 7;
-	TileRef defaultRef;
+
 	defaultRef.nameSize = 7;
 	defaultRef.name = "Default";
 	default.pallet = {
@@ -67,7 +57,28 @@ private:
 		glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
 		glm::u8vec4(0x00, 0x00, 0xFF, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	}; 
+
+
+	defaultBG.name = "Default";
+	defaultBG.nameSize = 7;
+	for (int ind = 0; ind < BackgroundWidth * BackgroundHeight; ind++) {
+		defaultBG.background[ind] = defaultRef;
+	}
+	
 	};
+	~AssetAtlas();
+
+	TileRef getRef(size_t nameSize, char* name, std::array< glm::u8vec4, 4> pallet); //Gives ref (or default ref) of desired tile with desired pallet
+	BGAsset getBG(size_t nameSize, char* name); //Searches for an individual background
+
+	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
+
+private:
+
+	TileAsset defaultTile; //In case asset isn't loaded, the defaults will be loaded instead
+
+	TileRef defaultRef;
 	
 	BGAsset defaultBG;
 
