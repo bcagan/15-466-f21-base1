@@ -7,7 +7,17 @@ struct TileAsset { //nameSize is length of string, must be loaded in by our prog
 	size_t nameSize; 
 	char* name; //Name in dictionary to be reffered to by code later
 	uint64_t bit1; //8x8 tile representing first 2 colors, bottom is top row, left to right
-	uint64_2 bit2; //Second 2 colors (3,4)
+	uint64_t bit2; //Second 2 colors (3,4)
+};
+
+struct TileAssetData { //Tile without name info
+	uint64_t bit1; //8x8 tile representing first 2 colors, bottom is top row, left to right
+	uint64_t bit2; //Second 2 colors (3,4)
+};
+
+struct AssetName {
+	size_t nameSize;
+	char* name; //Name in dictionary to be reffered to by code later
 };
 
 struct TileRef {
@@ -19,6 +29,13 @@ struct TileRef {
 struct BGAsset {
 	size_t nameSize; //Name and size of name of background
 	char* name;
+	//Backgrounds are stored as tiles,  64x60
+	std::array< TileRef, BackgroundWidth* BackgroundHeight > background;
+	//Stupid programming: All backgrounds will be inputted with unique (even if repeated with perviously loaded) set of tiles
+	//followed by its set of refs
+};
+
+struct BGAssetData {
 	//Backgrounds are stored as tiles,  64x60
 	std::array< TileRef, BackgroundWidth* BackgroundHeight > background;
 	//Stupid programming: All backgrounds will be inputted with unique (even if repeated with perviously loaded) set of tiles
@@ -50,6 +67,9 @@ public:
 		defaultTile.name = "Default";
 		defaultTile.nameSize = 7;
 
+		defaultTileData.bit0 = defaultTile.bit0;
+		defaultTileData.bit1 = defaultTile.bit1;
+
 		defaultRef.nameSize = 7;
 		defaultRef.name = "Default";
 		default.pallet = {
@@ -64,30 +84,37 @@ public:
 		defaultBG.nameSize = 7;
 		for (int ind = 0; ind < BackgroundWidth * BackgroundHeight; ind++) {
 			defaultBG.background[ind] = defaultRef;
-		}	
+		}
+		defaultBGData.background = defaultBG.background;
 
 	};
 	~AssetAtlas();
 
-	TileAsset getTile(size_t nameSize, char* name); //Gives tile of given name
-	BGAsset getBG(size_t nameSize, char* name); //Searches for an individual background
+	TileAssetData getTile(size_t nameSize, char* name); //Gives tile of given name
+	BGAssetData getBG(size_t nameSize, char* name); //Searches for an individual background
 
 	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
 
 private:
 
 	TileAsset defaultTile; //In case asset isn't loaded, the defaults will be loaded instead
+	TileAssetData defaultTileData; 
 
 	TileRef defaultRef;
-	
 	BGAsset defaultBG;
+	BGAssetData defaultBGData;
 
 	//Data strucutres are temporary for example, will be kept as vectors, resized as needed, linear searched.
-	std::vector<TileAsset> tiles(1024);
-	std::vector<BGAsset> bgs(16);
+	std::vector<TileAssetData> tiles(1024);
+	std::vector<AssetName> tileNameList(1024);
+	size_t tileNum = 0;
+	std::vector<BGAssetData> bgs(16);
+	std::vector<AssetNum> bgNameList(1024);
+	size_t bgNum = 0;
 
 	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
-	bool loadBG(size_t nameSize, char* name, uint64_t* packedBackground); //Loads an individual background
+	bool loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
+	bool loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
 
 	bool loadTiles(char* in); //Loads an array of tiles
 	bool loadBGs(char* in);  //Loads an array of backgrounds
