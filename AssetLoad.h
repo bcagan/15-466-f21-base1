@@ -69,7 +69,7 @@ public:
 	};
 	~AssetAtlas();
 
-	TileRef getRef(size_t nameSize, char* name, std::array< glm::u8vec4, 4> pallet); //Gives ref (or default ref) of desired tile with desired pallet
+	TileAsset getTile(size_t nameSize, char* name); //Gives tile of given name
 	BGAsset getBG(size_t nameSize, char* name); //Searches for an individual background
 
 	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
