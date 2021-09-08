@@ -95,6 +95,6 @@ private:
 	//Data structure of assets loaded in should then be
 	//# of independent tiles, each tiles name size, name, data, in array (char))
 	//# of backgrounds
-	//# of bg tiles, each tiles name size, name, data, in array (char)), array of refs each packed as expected (also char array)
+	//# of bg tiles, each tiles name size, name, data, in array (char)), array of refs each packed as expected (also char array) (this is for each INDIVIDUAL BG)
 
 };
