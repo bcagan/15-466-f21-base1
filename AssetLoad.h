@@ -29,43 +29,43 @@ class AssetAtlas
 {
 public:
 	AssetAtlas() = {
-	defaultTile.bit1 = {
-		0b01010101,
-		0b10101010,
-		0b01010101,
-		0b10101010,
-		0b01010101,
-		0b10101010,
-		0b01010101,
-		0b10101010, };
-	defaultTile.bit2 = {
-		0b10101010,
-		0b01010101,
-		0b10101010,
-		0b01010101,
-		0b10101010,
-		0b01010101,
-		0b10101010,
-		0b01010101, };
-	defaultTile.name = "Default";
-	defaultTile.nameSize = 7;
+		defaultTile.bit1 = {
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010, };
+		defaultTile.bit2 = {
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101, };
+		defaultTile.name = "Default";
+		defaultTile.nameSize = 7;
 
-	defaultRef.nameSize = 7;
-	defaultRef.name = "Default";
-	default.pallet = {
-		glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
-		glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
-		glm::u8vec4(0x00, 0x00, 0xFF, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	}; 
+		defaultRef.nameSize = 7;
+		defaultRef.name = "Default";
+		default.pallet = {
+			glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
+			glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
+			glm::u8vec4(0x00, 0x00, 0xFF, 0xff),
+			glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+		};
 
 
-	defaultBG.name = "Default";
-	defaultBG.nameSize = 7;
-	for (int ind = 0; ind < BackgroundWidth * BackgroundHeight; ind++) {
-		defaultBG.background[ind] = defaultRef;
-	}
-	
+		defaultBG.name = "Default";
+		defaultBG.nameSize = 7;
+		for (int ind = 0; ind < BackgroundWidth * BackgroundHeight; ind++) {
+			defaultBG.background[ind] = defaultRef;
+		}	
+
 	};
 	~AssetAtlas();
 
@@ -82,7 +82,7 @@ private:
 	
 	BGAsset defaultBG;
 
-	//Data strucutres are temporary for example, will probably replace with hash tables
+	//Data strucutres are temporary for example, will be kept as vectors, resized as needed, linear searched.
 	std::vector<TileAsset> tiles(1024);
 	std::vector<BGAsset> bgs(16);
 
