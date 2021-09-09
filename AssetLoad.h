@@ -69,14 +69,14 @@ public:
 			0b01010101,
 			0b10101010,
 			0b01010101, };
-		defaultTile.name = "Default";
+		defaultTile.name("Default",7);
 		defaultTile.nameSize = 7;
 
 		defaultTileData.bit0 = defaultTile.bit0;
 		defaultTileData.bit1 = defaultTile.bit1;
 
 		defaultRef.nameSize = 7;
-		defaultRef.name = "Default";
+		defaultRef.name("Default",7);
 		default.pallet = {
 			glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
 			glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
@@ -85,7 +85,7 @@ public:
 		};
 
 
-		defaultBG.name = "Default";
+		defaultBG.name( "Default",7);
 		defaultBG.nameSize = 7;
 		for (int ind = 0; ind < BackgroundWidth * BackgroundHeight; ind++) {
 			defaultBG.background[ind] = defaultRef;
@@ -121,8 +121,8 @@ private:
 	bool loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
 	bool loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
 
-	bool loadTiles(char* in); //Loads an array of tiles
-	bool loadBGs(char* in);  //Loads an array of backgrounds
+	size_t loadTiles(size_t n, char* in); //Loads an array of tiles
+	bool loadBGs(size_t n, char* in);  //Loads an array of backgrounds
 
 	BGAsset getBGHelp(size_t nameSize, char* name); //Searches for an individual background
 
