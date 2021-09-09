@@ -5,32 +5,32 @@
 
 struct TileAsset { //nameSize is length of string, must be loaded in by our program
 	size_t nameSize; 
-	char* name; //Name in dictionary to be reffered to by code later
-	uint64_t bit1; //8x8 tile representing first 2 colors, bottom is top row, left to right
-	uint64_t bit2; //Second 2 colors (3,4)
+	std::string name; //Name in dictionary to be reffered to by code later
+	uint64_t bit0; //8x8 tile representing first 2 colors, bottom is top row, left to right
+	uint64_t bit1; //Second 2 colors (3,4)
 };
 
 struct TileAssetData { //Tile without name info
-	uint64_t bit1; //8x8 tile representing first 2 colors, bottom is top row, left to right
-	uint64_t bit2; //Second 2 colors (3,4)
+	uint64_t bit0; //8x8 tile representing first 2 colors, bottom is top row, left to right
+	uint64_t bit1; //Second 2 colors (3,4)
 };
 
 struct AssetName {
 	size_t nameSize;
-	char* name; //Name in dictionary to be reffered to by code later
+	std::string name; //Name in dictionary to be reffered to by code later
 };
 
 struct TileRef {
 	size_t nameSize; //Name of tile being referenced, and its size
-	char* name;
+	std::string name;
 	std::array< glm::u8vec4, 4> pallet; //Pallets being used for given tile
 };
 
 struct BGAsset {
 	size_t nameSize; //Name and size of name of background
-	char* name;
+	std::string name;
 	//Backgrounds are stored as tiles,  64x60
-	std::array< TileRef, BackgroundWidth* BackgroundHeight > background;
+	std::array< TileRef, BackgroundWidth* BackgroundHeight > background
 	//Stupid programming: All backgrounds will be inputted with unique (even if repeated with perviously loaded) set of tiles
 	//followed by its set of refs
 };
@@ -42,11 +42,16 @@ struct BGAssetData {
 	//followed by its set of refs
 };
 
+struct BGRetType {
+	std::array< Tile, BackgroundWidth* BackgroundHeight > tiles;
+	std::array< std::array< glm::u8vec4, 4>, BackgrondWidth* BackgroundHeight> pallets;
+};
+
 class AssetAtlas
 {
 public:
 	AssetAtlas() = {
-		defaultTile.bit1 = {
+		defaultTile.bit0 = {
 			0b01010101,
 			0b10101010,
 			0b01010101,
@@ -55,7 +60,7 @@ public:
 			0b10101010,
 			0b01010101,
 			0b10101010, };
-		defaultTile.bit2 = {
+		defaultTile.bit1 = {
 			0b10101010,
 			0b01010101,
 			0b10101010,
@@ -90,8 +95,8 @@ public:
 	};
 	~AssetAtlas();
 
-	TileAssetData getTile(size_t nameSize, char* name); //Gives tile of given name
-	BGAssetData getBG(size_t nameSize, char* name); //Searches for an individual background
+	TileAssetData getTile(size_t nameSize, std::string name); //Gives tile of given name
+	BGRetType getBG(size_t nameSize, std::string name); //Searches for an individual background
 
 	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
 
@@ -118,6 +123,8 @@ private:
 
 	bool loadTiles(char* in); //Loads an array of tiles
 	bool loadBGs(char* in);  //Loads an array of backgrounds
+
+	BGAsset getBGHelp(size_t nameSize, char* name); //Searches for an individual background
 
 	//Data structure of assets loaded in should then be
 	//# of independent tiles, each tiles name size, name, data, in array (char))
