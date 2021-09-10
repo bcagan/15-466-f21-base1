@@ -95,8 +95,8 @@ public:
 	};
 	~AssetAtlas();
 
-	TileAssetData getTile(size_t nameSize, std::string name); //Gives tile of given name
-	BGRetType getBG(size_t nameSize, std::string name); //Searches for an individual background
+	TileAssetData getTile(std::string name); //Gives tile of given name
+	BGRetType getBG(std::string name); //Searches for an individual background
 
 	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
 
