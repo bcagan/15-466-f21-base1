@@ -9,11 +9,7 @@
 
 #include <random>
 
-<<<<<<< HEAD
 #include "CollisionManager.hpp"
-=======
-
->>>>>>> 6b751a8a0d18d56fbb1fa1e48860ce0a0bb3f1ee
 
 PlayMode::PlayMode() {
 
