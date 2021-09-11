@@ -83,12 +83,10 @@ private:
 
 public:
 	AssetAtlas() {
-		/*
 		tiles = std::vector<TileAssetData>(1024);
 		tileNameList.resize(1024);
 		bgs.resize(16);
 		bgNameList.resize(1024);
-		*/
 		defaultTile.bit0 =
 			(uint64_t)(0b01010101) << 56 | 
 			(uint64_t)(0b10101010) << 48 | 
