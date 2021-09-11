@@ -1,4 +1,5 @@
 #include "PlayMode.hpp"
+#include "AssetImporter.hpp"
 
 //for the GL_ERRORS() macro:
 #include "gl_errors.hpp"
@@ -8,7 +9,13 @@
 
 #include <random>
 
+
+
 PlayMode::PlayMode() {
+
+	//Load in new files, and clean out the old script!
+	AssetImporter importer;
+
 	//TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
