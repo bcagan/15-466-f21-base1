@@ -1,5 +1,6 @@
 #include "PPU466.hpp"
 #include "Mode.hpp"
+#include "AssetLoad.h"
 
 #include <glm/glm.hpp>
 
