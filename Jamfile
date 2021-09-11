@@ -124,6 +124,7 @@ GAME_NAMES =
 	data_path
 	Mode
 	GL
+	AssetImporter
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory
