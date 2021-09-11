@@ -5,6 +5,51 @@
 #include <string>
 #include "data_path.hpp"
 
+
+AssetAtlas::AssetAtlas(){
+	defaultTile.bit0 = {
+		0b01010101,
+		0b10101010,
+		0b01010101,
+		0b10101010,
+		0b01010101,
+		0b10101010,
+		0b01010101,
+		0b10101010, };
+	defaultTile.bit1 = {
+		0b10101010,
+		0b01010101,
+		0b10101010,
+		0b01010101,
+		0b10101010,
+		0b01010101,
+		0b10101010,
+		0b01010101, };
+	defaultTile.name("Default",7);
+	defaultTile.nameSize = 7;
+
+	defaultTileData.bit0 = defaultTile.bit0;
+	defaultTileData.bit1 = defaultTile.bit1;
+
+	defaultRef.nameSize = 7;
+	defaultRef.name("Default",7);
+	default.pallet = {
+		glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
+		glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
+		glm::u8vec4(0x00, 0x00, 0xFF, 0xff),
+		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	};
+
+
+	defaultBG.name("Default",7);
+	defaultBG.nameSize = 7;
+	for (int ind = 0; ind < BackgroundWidth * BackgroundHeight; ind++) {
+		defaultBG.background[ind] = defaultRef;
+	}
+	defaultBGData.background = defaultBG.background;
+
+}
+
 //Trys to find (linear search) a tile with the name given by the user. If it doesn't exist, gives default tile
 TileAssetData AssetAtlas::getTile(std::string name) {
 	for (size_t index = 0; index < tileNum; index++) {
@@ -43,6 +88,14 @@ BGRetType getBG(std::string name) {
 
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
+	auto extractVector = [this](uint64_t* packedBits) {
+		std::array<uint8_t, 8> bits;
+		for (char ind - 0; ind < 8; ind++) {
+			bits[ind] = ((uint8_t*)packedBits)[ind];
+		}
+		return bits;
+	}
+
 	if (tiles == NULL || tileNameList == NULL) return false; //Safety check
 	if (tileNum == tiles.size()) { //If needed, extend vector
 		tiles.resize(2 * tileNum);
@@ -52,8 +105,8 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 
 	tileNameList[tileNum].name(name,nameSize); //Load information into arrray
 	tileNameList[tileNum].nameSize = nameSize;
-	tiles[tileNum].bit0 = *packedTile;
-	tiles[tileNum].bit1 = packedTile[1];
+	tiles[tileNum].bit0 = extractVector(packedTile);
+	tiles[tileNum].bit1 = extractVector(packedTile+1);
 	return true;
 }
 
@@ -130,17 +183,22 @@ bool loadHelper(char* in) {
 }
 
 //Temporary file loading code that I am very very unsure of
-bool loadAssets(std::string fileName) {
+/*bool loadAssets(std::string fileName) {
 	std::string path = data_path(fileName);
 	std::ifstream assetFile(path, std::ios::binary);
 	assert(assetFile.isOpen());
 	//File size code from https://stackoverflow.com/questions/10712117/how-to-count-the-characters-in-a-text-file
 	assetFile.seekg(0, std::ios_base::end);
-	size_t fileSize = (size_t) std::ios_base::streampos end_pos = assetFile.tellg();
+	size_t fileSize = (size_t)std::ios_base::streampos end_pos = assetFile.tellg();
 	char* dataString[fileSize];
 	assetFile.get(dataString, fileSize);
 	if (!assetFile) return false;
 	assetFile.close();
 	return loadHelper(dataString);
+}*/
+
+//Testing version of the above
+bool loadAssets(const char* data) {;
+	return loadHelper(data);
 }
 

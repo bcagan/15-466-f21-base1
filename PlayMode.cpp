@@ -8,6 +8,10 @@
 
 #include <random>
 
+
+//Asset loading library
+#include "AssetLoad.h"
+
 PlayMode::PlayMode() {
 	//TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
@@ -48,9 +52,13 @@ PlayMode::PlayMode() {
 		}
 	}
 
+	/*First test, replace by loading these into asset atlas, getting them, and loading into the PPU from there*/
+	/* Then try doing with every sprite (larger array)*/
+
 	//use sprite 32 as a "player":
-	ppu.tile_table[32].bit0 = {
-		0b01111110,
+	//ppu.tile_table[32].bit0 = {
+	uint8_t bits[16] = { 
+		0b01111110, 
 		0b11111111,
 		0b11111111,
 		0b11111111,
@@ -58,8 +66,6 @@ PlayMode::PlayMode() {
 		0b11111111,
 		0b11111111,
 		0b01111110,
-	};
-	ppu.tile_table[32].bit1 = {
 		0b00000000,
 		0b00000000,
 		0b00100100,
@@ -67,9 +73,12 @@ PlayMode::PlayMode() {
 		0b00000000,
 		0b01000010,
 		0b00100100,
-		0b01000010,
-	};
-
+		0b01000010 };
+	uint64_t* bitsUse = (uint64_t*) bits;
+	AssetAtlas spriteAtlas = AssetAtlas();
+	spriteAtlas.loadTile(6, ("player"), bitsUse);
+	ppu.tile_table[32].bit0 = spriteAtlas.getTile("player").bit0;
+	ppu.tile_table[32].bit1 = spriteAtlas.getTile("player").bit1;
 	//use sprite 32 as a "player true":
 	ppu.tile_table[33].bit0 = {
 		0b11111111,
