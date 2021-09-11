@@ -129,7 +129,7 @@ public:
 		defaultBGData.background = defaultBG.background;
 
 	};
-	~AssetAtlas();
+	~AssetAtlas() {};
 
 	TileAssetData getTile(std::string name); //Gives tile of given name
 	BGRetType getBG(std::string name); //Searches for an individual background

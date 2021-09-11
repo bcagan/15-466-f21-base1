@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <filesystem>
 #include <iostream>
+#include <unistd.h>
 
 AssetImporter::AssetImporter()
 {
@@ -23,14 +24,20 @@ AssetImporter::AssetImporter()
 
 		std::cout << "Loading file: " << path << std::endl;
 
-		if (std::filesystem::exists(path))
+		// code for access based on https://stackoverflow.com/questions/8580606/c-c-mac-os-x-check-if-file-exists
+		int r = access(path.c_str(), R_OK);
+		if (r == ENOENT)
+		{
+			std::cout << "File did not exist!" << std::endl;
+		} else if (r == EACCES)
+		{
+			std::cout << "File is not readable!" << std::endl;
+		} else if (r > 0) //file read successful
 		{
 			load_png(path, &size, &data, LowerLeftOrigin);
 			std::cout << "File is " << size.x << ", " << size.y << std::endl;
-		}
-		else
-		{
-			std::cout << "File did not exist!" << std::endl;
+		} else {
+			std::cout << "Error with file access" << std::endl;
 		}
 
 	}
