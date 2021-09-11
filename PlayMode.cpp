@@ -8,6 +8,8 @@
 
 #include <random>
 
+#include "CollisionManager.hpp"
+
 PlayMode::PlayMode() {
 	//TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
