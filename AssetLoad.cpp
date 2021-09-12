@@ -5,7 +5,7 @@
 #include <string>
 #include "data_path.hpp"
 
-/*
+
 
 //Trys to find (linear search) a tile with the name given by the user. If it doesn't exist, gives default tile
 TileAssetData AssetAtlas::getTile(std::string name) {
@@ -148,4 +148,3 @@ bool loadAssets(std::string fileName) {
 }
 
 
-*/

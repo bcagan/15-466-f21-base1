@@ -20,12 +20,14 @@ PlayMode::PlayMode() {
 
 	collision_manager = CollisionManager(&(ppu.sprites));
 
-
 	// step 1) read the tiles form the asset atlas
-	
+	std::string assets_path = "./";
+	atlas.loadAssets(assets_path);
 
 	// step 2) load the current background and level
 	//TODO:
+	curr_bg = atlas.getBG("DefaultBackground").tiles;
+
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
 	// or, at least, if you do hardcode them like this,
