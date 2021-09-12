@@ -1,6 +1,6 @@
 #include "PPU466.hpp"
 #include "Mode.hpp"
-#include "AssetLoad.hpp"
+#include "AssetLoad.h"
 
 #include <glm/glm.hpp>
 
@@ -18,6 +18,13 @@
 struct PlayMode : Mode {
 	PlayMode();
 	virtual ~PlayMode();
+
+	enum GameState
+	{
+		GAMEPLAY,
+		WIN,
+		DEAD
+	};
 
 	// ----- asset importing -----
 	AssetAtlas atlas;
@@ -38,9 +45,13 @@ struct PlayMode : Mode {
 	unsigned goal_tile_index = 34;
 	int health; //the player dies when health is less than zero
 	std::array<unsigned short, 64> light_levels; // the light levels of each block
+	unsigned death_screen_index; //index into sprite array for death screen background
 	void level_complete(); // TODO
 	void subtract_health(int amt) {health -= amt; if (health < 0) player_died(); }
 	void player_died(); // TODO
+
+	GameState curr_state;
+	GameState next_state;
 
 	//input tracking:
 	struct Button {

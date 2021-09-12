@@ -4,6 +4,7 @@
 // September 11, 2021
 
 #include "PPU466.hpp"
+#include <vector>
 
 // CollisionManager will determine whether 2 tiles in the game overlap. This 
 // is to be used for player-ground interaction.
@@ -20,8 +21,26 @@ class CollisionManager
 		// This function implicitly assumes that each is of size 8x8
 		bool Collides(int s1, int s2);
 
+		// returns true if the sprite at index s in the PPU sprites array 
+		// is a collidable tile, e.g. the floor or wall. 
+		bool isTileCollidable(int s)
+		{
+			for (auto i = COLLIDABLE_TILES.begin(); i < COLLIDABLE_TILES.end(); i++)
+			{
+				if (s == *i)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 	private:
 
 		// CollisionManager.sprites should be a pointer to PPU466.sprites 
 		std::array< PPU466::Sprite, 64 > *sprites;
+
+		// TODO: replace with indicies into sprite array for collidable tiles
+		std::vector<int> COLLIDABLE_TILES = {0, 0, 0, 0};
+
 };

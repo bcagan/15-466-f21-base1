@@ -19,6 +19,7 @@ PlayMode::PlayMode() {
 	atlas = AssetAtlas();
 
 	collision_manager = CollisionManager(&(ppu.sprites));
+	
 	//TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
@@ -201,10 +202,10 @@ void PlayMode::update(float elapsed) {
 	if (collision_manager.Collides(player_tile_index, goal_tile_index))
 	{
 		level_complete();
+		next_state = WIN;
 	}
 
 	//TODO: if player collides with a light, subtract health
-
 	//TODO: if the player is in shadow, add health
 }
 
