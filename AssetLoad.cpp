@@ -4,7 +4,7 @@
 #include "PPU466.hpp"
 #include <string>
 #include "data_path.hpp"
-#include <io.h>
+#include <iostream>
 
 //Trys to find (linear search) a tile with the name given by the user. If it doesn't exist, gives default tile
 TileAssetData AssetAtlas::getTile(std::string name) {
@@ -12,7 +12,7 @@ TileAssetData AssetAtlas::getTile(std::string name) {
 		AssetName curTile = tileNameList[index];
 		if (curTile.name.compare(name) == 0) return tiles[index];
 	}
-//	std::cout << "error: could not find tile ''" << name << "'' in atlas.\n Using default tile.\n";
+	std::cout << "error: could not find tile ''" << name << "'' in atlas.\n Using default tile.\n";
 	return defaultTileData;
 }
 
@@ -44,6 +44,7 @@ BGRetType AssetAtlas::getBG(std::string name) {
 
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
+	std::cout << name << std::endl;
 	auto unPack = [this](uint64_t* thisTile) {
 		std::array< uint8_t, 8 > bit;
 		for (size_t ind = 0; ind < 8; ind++) {
@@ -51,16 +52,26 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 		}
 		return bit;
 	};
+	if (tiles.size() != tileNameList.size()) {
+		if (tileNum == tiles.size()) tileNameList.resize(tileNum);
+		else tiles.resize(tileNum);
+	}
 	if (tileNum == tiles.size()) { //If needed, extend vector
 		tiles.resize(2 * tileNum);
 		tileNameList.resize(2 * tileNum);
 	}
-	tileNum++;
 	if (packedTile == NULL) return false;
-	tileNameList[tileNum].name = std::string(name); //Load information into arrray
-	tileNameList[tileNum].nameSize = nameSize;
-	tiles[tileNum].bit0 = unPack(packedTile);
-	tiles[tileNum].bit1 = unPack(packedTile+1);
+	TileAssetData newTile;
+	AssetName newTileName;
+	newTileName.name = std::string(name); //Load information into arrray
+	newTileName.nameSize = nameSize;
+	tileNameList[tileNum] = newTileName;
+	std::cout << tileNameList[tileNum].name << " " << tileNum << std::endl;
+	newTile.bit0 = unPack(packedTile);
+	newTile.bit1 = unPack(packedTile+1);
+	tiles[tileNum] = newTile;
+	assert(tiles.size() == tileNameList.size());
+	tileNum++;
 
 	return true;
 }
