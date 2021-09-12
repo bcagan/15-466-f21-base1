@@ -21,7 +21,7 @@ PlayMode::PlayMode() {
 	collision_manager = CollisionManager(&(ppu.sprites));
 
 	// step 1) read the tiles form the asset atlas
-	std::string assets_path = "./";
+	std::string assets_path = "./"; // TODO: change this
 	atlas.loadAssets(assets_path);
 
 	// step 2) load the current background and level

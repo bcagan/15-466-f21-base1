@@ -49,6 +49,23 @@ struct BGRetType {
 	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
 };
 
+struct LevelAsset {
+	size_t nameSize; //name and size of the level
+	std::string name;
+	//Levels are stored as tiles, 64x60
+	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
+};
+
+struct LevelAssetData {
+	//levels are stored as tiles, 64x60
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > level;
+};
+
+struct LevelRetType {
+	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
+	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
+};
+
 class AssetAtlas
 {
 private:
@@ -135,6 +152,7 @@ public:
 
 	TileAssetData getTile(std::string name); //Gives tile of given name
 	BGRetType getBG(std::string name); //Searches for an individual background
+	LevelRetType getLevel(std::string name);//Searched for individual level
 
 	bool loadAssets(std::string fileName); //Loads a file of assets
 	
