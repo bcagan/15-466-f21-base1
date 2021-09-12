@@ -46,6 +46,7 @@ BGRetType AssetAtlas::getBG(std::string name) {
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 	auto unPack = [this](uint64_t* thisTile) {
+		(void)this;
 		std::array< uint8_t, 8 > bit;
 		for (size_t ind = 0; ind < 8; ind++) {
 			bit[ind] = ((uint8_t*)thisTile)[ind];
@@ -82,6 +83,8 @@ char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground
 		//BackgroundHeight * BackgroundWidth in size
 		std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > retBackground;
 		size_t refSize = sizeof(TileRef);
+		(void)refSize;
+		(void)this;
 		for (size_t whichTile = 0; whichTile < PPU466::BackgroundWidth * PPU466::BackgroundHeight; whichTile++) {
 			retBackground[whichTile] = ((TileRef*)(backgroundRef))[whichTile];
 		}

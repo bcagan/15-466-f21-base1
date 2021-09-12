@@ -66,5 +66,5 @@ struct PlayMode : Mode {
 	//----- drawing handled by PPU466 -----
 	PPU466 ppu;
 	//current background
-	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
+	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
 };
