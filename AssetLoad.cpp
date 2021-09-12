@@ -4,7 +4,7 @@
 #include "PPU466.hpp"
 #include <string>
 #include "data_path.hpp"
-
+#include <iostream>
 
 
 //Trys to find (linear search) a tile with the name given by the user. If it doesn't exist, gives default tile
@@ -31,9 +31,9 @@ BGAssetData AssetAtlas::getBGHelp(std::string name) {
 //Takes a user's inputted name and tries to find a background using getBHHelp matching it. If it can't find it, uses default background
 //Coverts refs into proper background tiles with the pallets from the refs.
 BGRetType AssetAtlas::getBG(std::string name) {
-	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > thisBG = (getBGHelp(name)).data; //Get reference array
-	BGRetType retBG = new BGRetType;
-	for (size_t ind = 0; ind < PPU466::backgroundHeight * PPU466::backgroundWidth; ind++) {
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > thisBG = (getBGHelp(name)).background; //Get reference array
+	BGRetType retBG;
+	for (size_t ind = 0; ind < PPU466::BackgroundHeight * PPU466::BackgroundWidth; ind++) {
 		TileRef thisTile = thisBG[ind]; //Get tile from each reference and put into the return aray
 		TileAssetData thisTileData = getTile(thisTile.name);
 		retBG.tiles[ind].bit0 = thisTileData.bit0;
@@ -45,61 +45,77 @@ BGRetType AssetAtlas::getBG(std::string name) {
 
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
-	if (tiles == NULL || tileNameList == NULL) return false; //Safety check
+	auto unPack = [this](uint64_t* thisTile) {
+		std::array< uint8_t, 8 > bit;
+		for (size_t ind = 0; ind < 8; ind++) {
+			bit[ind] = ((uint8_t*)thisTile)[ind];
+		}
+		return bit;
+	};
+	if (tiles.size() != tileNameList.size()) {
+		if (tileNum == tiles.size()) tileNameList.resize(tileNum);
+		else tiles.resize(tileNum);
+	}
 	if (tileNum == tiles.size()) { //If needed, extend vector
 		tiles.resize(2 * tileNum);
 		tileNameList.resize(2 * tileNum);
 	}
+	if (packedTile == NULL) return false;
+	TileAssetData newTile;
+	AssetName newTileName;
+	newTileName.name = std::string(name,nameSize); //Load information into arrray
+	newTileName.nameSize = nameSize;
+	tileNameList[tileNum] = newTileName;
+	newTile.bit0 = unPack(packedTile);
+	newTile.bit1 = unPack(packedTile+1);
+	tiles[tileNum] = newTile;
+	assert(tiles.size() == tileNameList.size());
 	tileNum++;
 
-	tileNameList[tileNum].name = name; //Load information into arrray
-	tileNameList[tileNum].nameSize = nameSize;
-	tiles[tileNum].bit0 = *packedTile;
-	tiles[tileNum].bit1 = packedTile[1];
 	return true;
 }
 
 //Loads the reference data from the background data loaded in previously into the last entry in the background data vector
-size_t AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground) {
+char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground) {
 
-	auto unPack = [this]() { //Lambda to interpret packed background data as an array of tileRefs
-		//PPU466::BackgroundHeight * PPU466::BackgroundWidth in size
+	auto unPack = [this](char* backgroundRef) { //Lambda to interpret packed background data as an array of tileRefs
+		//BackgroundHeight * BackgroundWidth in size
 		std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > retBackground;
 		size_t refSize = sizeof(TileRef);
 		for (size_t whichTile = 0; whichTile < PPU466::BackgroundWidth * PPU466::BackgroundHeight; whichTile++) {
-			retBackground[whichTile] = ((TileRef*)(packedBackground))[whichTile];
+			retBackground[whichTile] = ((TileRef*)(backgroundRef))[whichTile];
 		}
 		return retBackground;
 	};
 
-	if (bgs == NULL || bgNameList == NULL) return 0; //Safety check (NULL pointer is same as false in this case)
+	if (packedBackground == NULL) return NULL; //Safety check (NULL pointer is same as false in this case)
 	if (bgNum == bgs.size()) { //If needed, resize
 		bgs.resize(2 * bgNum);
 		bgNameList.resize(2 * bgNum);
 	}
 	bgNum++;
 
-	bgNameList[bgNum].name = name; //Load name, nameSize, and newly created tileRef array into back of bg data vector
+	bgNameList[bgNum].name = std::string(name,nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
 	bgNameList[bgNum].nameSize = nameSize;
-	bgs[bgNum].background = unPack();
-	return (size_t)(packedBackground+ (PPU466::BackgroundWidth * PPU466::BackgroundHeight * sizeof(TileRef))); //Return adress (as size_t) of next background
+	bgs[bgNum].background = unPack(packedBackground);
+	return (char*)(packedBackground+ (PPU466::BackgroundWidth * PPU466::BackgroundHeight * sizeof(TileRef))); //Return adress (as size_t) of next background
 }
 
-size_t loadTiles(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
+char* AssetAtlas::loadTiles(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
 	char* nextTile = in; //Begin marker that will be used to indicate the next tile to be loaded
-	for (int whichTile = 0; whichTile < n; whichTile++) { 
+	for (int whichTile = 0; whichTile < n; whichTile++) {
 		size_t* curSize = (size_t*)nextTile; //First 8 bytes of a tile are the name size
 		if (curSize == NULL) return 0;
 		char* name = (nextTile + 8); //Name follows the name size
 		char* tileData = (name + *curSize); //The data of the tile itself is the rest current tile
 		nextTile = (tileData + (8 * 2)); //The data takes up 2 uint64_ts, followed by the next tile
-		if(!loadTile(*curSize, name, tileData)) return 0;
+		if(!loadTile(*curSize, name, (uint64_t*)tileData)) return NULL;
 	}
-	return (size_t) nextTile;
+	return (char*) nextTile;
 }
 
 //Wrapper for loading a backgrounds tile and tile reference arrays
-size_t loadBG(size_t nameSize, char* name, char* packedBackground) {
+char* AssetAtlas::loadBG(size_t nameSize, char* name, char* packedBackground) {
 	size_t* nTiles = (size_t*)packedBackground; 
 	if (nTiles == NULL) return 0;
 	packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
@@ -108,32 +124,31 @@ size_t loadBG(size_t nameSize, char* name, char* packedBackground) {
 	return loadBGRefs(nameSize, name, packedBackground);  //Load the reference array
 }
 
-
-bool loadBGs(size_t n, char* in) {  //Loads an array of backgrounds
+bool AssetAtlas::loadBGs(size_t n, char* in) {  //Loads an array of backgrounds*/
 	char* nextBG = in;
 	for (size_t index = 0; index < n; index++) {
 		size_t* nameSize = (size_t*)nextBG;
 		if (nameSize == NULL) return false;
 		char* name = (nextBG + 8);
 		char* bgArray = (name + *nameSize);
-		nextBG = (char*)loadBG(nameSize, name, bgArray);
+		nextBG = (loadBG(*nameSize, name, bgArray));
 		if (nextBG == NULL) return false;
 	}
 	return true;
 }
 
-bool loadHelper(char* in) {
+bool AssetAtlas::loadHelper(char* in) {
 	size_t* numTiles = (size_t*)in;
 	if (numTiles == NULL) return false;
 	char* tileData = (in + 8);
-	char* bgStart = loadTiles(numTiles, tileData);
+	char* bgStart = loadTiles(*numTiles, tileData);
 	if (bgStart == NULL) return false;
 	size_t* numBGs = (size_t*)bgStart;
 	return loadBGs(*numBGs, (bgStart + 8));
 }
 
 //Temporary file loading code that I am very very unsure of
-bool loadAssets(std::string fileName) {
+bool AssetAtlas::loadAssets(std::string fileName) {/*
 	std::string path = data_path(fileName);
 	std::ifstream assetFile(path, std::ios::binary);
 	assert(assetFile.isOpen());
@@ -144,7 +159,8 @@ bool loadAssets(std::string fileName) {
 	assetFile.get(dataString, fileSize);
 	if (!assetFile) return false;
 	assetFile.close();
-	return loadHelper(dataString);
+	return loadHelper(dataString);*/
+	return false;
 }
 
 
