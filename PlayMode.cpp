@@ -167,6 +167,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = true;
 			return true;
 		}
+		else if (evt.key.keysym.sym == SDLK_SPACE) {
+			space.downs += 1;
+			space.pressed = true;
+			return true;
+		}
 	} else if (evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.sym == SDLK_LEFT) {
 			left.pressed = false;
@@ -177,8 +182,14 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.sym == SDLK_UP) {
 			up.pressed = false;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
+		}
+		else if (evt.key.keysym.sym == SDLK_DOWN) {
 			down.pressed = false;
+			return true;
+		}
+		else if (evt.key.keysym.sym == SDLK_SPACE)
+		{
+			space.pressed = false;
 			return true;
 		}
 	}
@@ -194,16 +205,55 @@ void PlayMode::update(float elapsed) {
 	background_fade -= std::floor(background_fade);
 
 	constexpr float PlayerSpeed = 30.0f;
-	if (left.pressed) player_at.x -= PlayerSpeed * elapsed;
-	if (right.pressed) player_at.x += PlayerSpeed * elapsed;
-	if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
-	if (up.pressed) player_at.y += PlayerSpeed * elapsed;
+	player_velocity.x = 0;
+	if (left.pressed) player_velocity.x -= PlayerSpeed;
+	if (right.pressed) player_velocity.x += PlayerSpeed;
+
+	if (space.pressed && space.held < max_jump_time && grounded)
+	{
+		jumping = true;
+		space.held += elapsed;
+		if (space.held < max_jump_time)
+		{
+			player_velocity.y = jump_speed;
+		}
+	}
+	else
+	{
+		grounded = false;
+		if (space.held > 0.0f && jumping)
+		{
+			player_velocity.y = 0.0f;
+			jumping = false;
+		}
+		if (!space.pressed)
+		{
+			space.held = 0.0f;
+		}
+	}
+
+	player_velocity.y += gravity * elapsed;
+
+	//if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
+	//if (up.pressed) player_at.y += PlayerSpeed * elapsed;
+
+	player_at += player_velocity * elapsed;
+
+	//Bounds check!
+	if (player_at.y <= 0)
+	{
+		player_at.y = 0;
+		player_velocity.y = 0;
+		grounded = true;
+	}
 
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
 	up.downs = 0;
 	down.downs = 0;
+	space.downs = 0;
+
 
 	//if player collides with goal, win the game
 	if (collision_manager.Collides(player_tile_index, goal_tile_index))
