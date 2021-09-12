@@ -44,7 +44,6 @@ BGRetType AssetAtlas::getBG(std::string name) {
 
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
-	std::cout << name << std::endl;
 	auto unPack = [this](uint64_t* thisTile) {
 		std::array< uint8_t, 8 > bit;
 		for (size_t ind = 0; ind < 8; ind++) {
@@ -63,10 +62,9 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 	if (packedTile == NULL) return false;
 	TileAssetData newTile;
 	AssetName newTileName;
-	newTileName.name = std::string(name); //Load information into arrray
+	newTileName.name = std::string(name,nameSize); //Load information into arrray
 	newTileName.nameSize = nameSize;
 	tileNameList[tileNum] = newTileName;
-	std::cout << tileNameList[tileNum].name << " " << tileNum << std::endl;
 	newTile.bit0 = unPack(packedTile);
 	newTile.bit1 = unPack(packedTile+1);
 	tiles[tileNum] = newTile;
@@ -96,7 +94,7 @@ char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground
 	}
 	bgNum++;
 
-	bgNameList[bgNum].name = std::string(name); //Load name, nameSize, and newly created tileRef array into back of bg data vector
+	bgNameList[bgNum].name = std::string(name,nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
 	bgNameList[bgNum].nameSize = nameSize;
 	bgs[bgNum].background = unPack(packedBackground);
 	return (char*)(packedBackground+ (PPU466::BackgroundWidth * PPU466::BackgroundHeight * sizeof(TileRef))); //Return adress (as size_t) of next background
@@ -104,7 +102,7 @@ char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground
 
 char* AssetAtlas::loadTiles(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
 	char* nextTile = in; //Begin marker that will be used to indicate the next tile to be loaded
-	for (int whichTile = 0; whichTile < n; whichTile++) { 
+	for (int whichTile = 0; whichTile < n; whichTile++) {
 		size_t* curSize = (size_t*)nextTile; //First 8 bytes of a tile are the name size
 		if (curSize == NULL) return 0;
 		char* name = (nextTile + 8); //Name follows the name size

@@ -60,14 +60,14 @@ private:
 	BGAssetData defaultBGData;
 
 	//Data strucutres are temporary for example, will be kept as vectors, resized as needed, linear searched.
-	//std::vector<TileAssetData> tiles;
-	//std::vector<AssetName> tileNameList;
+	std::vector<TileAssetData> tiles;
+	std::vector<AssetName> tileNameList;
 	size_t tileNum = 0;
 	std::vector<BGAssetData> bgs;
 	std::vector<AssetName> bgNameList;
 	size_t bgNum = 0;
 
-	//bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
+	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
 	char* loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
 	char* loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
 
@@ -83,8 +83,6 @@ private:
 	//# of bg tiles, each tiles name size, name, data, in array (char)), array of refs each packed as expected (also char array) (this is for each INDIVIDUAL BG)
 
 public:
-	std::vector<TileAssetData> tiles;
-	  std::vector<AssetName> tileNameList;
 
 	AssetAtlas() {
 		tiles = std::vector<TileAssetData>(1024);
@@ -139,7 +137,7 @@ public:
 	BGRetType getBG(std::string name); //Searches for an individual background
 
 	bool loadAssets(std::string fileName); //Loads a file of assets
-	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
+	
 
 
 };
