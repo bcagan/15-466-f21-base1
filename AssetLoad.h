@@ -83,6 +83,9 @@ private:
 	std::vector<BGAssetData> bgs;
 	std::vector<AssetName> bgNameList;
 	size_t bgNum = 0;
+	std::vector<LevelAssetData> levels;
+	std::vector<AssetName> levelNameList;
+	size_t levelNum = 0;
 
 	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
 	char* loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
@@ -100,15 +103,19 @@ private:
 	//Notes on backround: Array of tiles is tile data itself. Could be unique to background or already loaded. Could be all or none of the tiles referenced.
 	//Tile refs are the name of the tile being used and the pallet for that specific tile index.
 	//
-	//Level Data: TBA
+	//Level Data: No tile array at all, each ref's name consist purley of the id (#) of the object type, refs are just the id name and pallet (Ill leave what to
+	//do with the pallet up to you)
 
 public:
 
 	AssetAtlas() {
-		tiles = std::vector<TileAssetData>(256); //PPU can only have max of 256 tiles
+		tiles = std::vector<TileAssetData>(256); //We can store more than 256 tiles at a time, we might want to swap in and out tiles
+		//(We wouldn't need to do this for this project, but if we decide to use PPU for the final it might be useful to be able to load in more at the start)
 		tileNameList.resize(256);
 		bgs.resize(16);
-		bgNameList.resize(1024);
+		bgNameList.resize(16);
+		levels.resize(8);
+		levelNameList.resize(8);
 		defaultTile.bit0 =
 		{	0b10101010,
 			0b01010101,
@@ -138,8 +145,8 @@ public:
 		defaultRef.pallet = {
 			glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
 			glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
-			glm::u8vec4(0x00, 0x00, 0xFF, 0xff),
-			glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+			glm::u8vec4(0x00, 0x00, 0xFF, 0xFF),
+			glm::u8vec4(0x00, 0x00, 0x00, 0xFF),
 		};
 
 
@@ -150,12 +157,14 @@ public:
 		}
 		defaultBGData.background = defaultBG.background;
 
+		//Should we make a default level?
+
 	};
 	~AssetAtlas() {};
 
 	TileAssetData getTile(std::string name); //Gives tile of given name
 	BGRetType getBG(std::string name); //Searches for an individual background
-	LevelRetType getLevel(std::string name);//Searched for individual level
+	LevelRetType getLevel(std::string name);//Searches for individual level
 
 	bool loadTiles(std::string fileName); //Loads an array of tiles
 	bool loadBG(std::string fileName);  //Loads an array of backgrounds

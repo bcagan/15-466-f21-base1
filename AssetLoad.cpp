@@ -43,6 +43,8 @@ BGRetType AssetAtlas::getBG(std::string name) {
 	return retBG;
 }
 
+//Need a level search function
+
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 	auto unPack = [this](uint64_t* thisTile) {
@@ -77,7 +79,7 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 }
 
 //Loads the reference data from the background data loaded in previously into the last entry in the background data vector
-char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground) {
+char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground, bool isBG) {
 
 	auto unPack = [this](char* backgroundRef) { //Lambda to interpret packed background data as an array of tileRefs
 		//BackgroundHeight * BackgroundWidth in size
@@ -91,17 +93,31 @@ char* AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground
 		return retBackground;
 	};
 
-	if (packedBackground == NULL) return NULL; //Safety check (NULL pointer is same as false in this case)
+	if (packedBackground == NULL) return false; //Safety check (NULL pointer is same as false in this case)
 	if (bgNum == bgs.size()) { //If needed, resize
 		bgs.resize(2 * bgNum);
 		bgNameList.resize(2 * bgNum);
 	}
-	bgNum++;
+	if (levelNum == levels.size()) {
+		levels.resize(2 * levelNum);
+		levelNameList.resize(2 * levelNum);
+	}
+	if (isBG)
+		bgNum++;
+	else
+		levelNum++;
 
-	bgNameList[bgNum].name = std::string(name,nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
-	bgNameList[bgNum].nameSize = nameSize;
-	bgs[bgNum].background = unPack(packedBackground);
-	return (char*)(packedBackground+ (PPU466::BackgroundWidth * PPU466::BackgroundHeight * sizeof(TileRef))); //Return adress (as size_t) of next background
+	if(isBG){
+		bgNameList[bgNum].name = std::string(name,nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
+		bgNameList[bgNum].nameSize = nameSize;
+		bgs[bgNum].background = unPack(packedBackground);
+	}
+	else {
+		levelNameList[levelNum].name = std::string(name, nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
+		levelNameList[levelNum].nameSize = nameSize;
+		//levels[bgNum].level = //Put your unpacking function here;
+	}
+	return true; //Return adress (as size_t) of next background
 }
 
 bool AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
@@ -141,13 +157,15 @@ bool AssetAtlas::loadTiles(std::string fileName) {
 }
 
 //Wrapper for loading a backgrounds tile and tile reference arrays
-bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground) {
-	size_t* nTiles = (size_t*)packedBackground; 
-	if (nTiles == NULL) return 0;
-	packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
-	packedBackground = (char*) loadTiles(*nTiles, packedBackground);  //The return value is the start of the reference array
+bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground, bool isBG) { //isBG == true -> background, isBG == false -> level data
+	if (isBG) {
+		size_t* nTiles = (size_t*)packedBackground;
+		if (nTiles == NULL) return 0;
+		packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
+		packedBackground = (char*)loadTiles(*nTiles, packedBackground);  //The return value is the start of the reference array
+	}
 	if (!packedBackground) return 0; 
-	return loadBGRefs(nameSize, name, packedBackground);  //Load the reference array
+	return loadBGRefs(nameSize, name, packedBackground, isBG);  //Load the reference array
 }
 
 bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  background*/
