@@ -16,17 +16,17 @@ PlayMode::PlayMode() {
 	//Load in new files, and clean out the old script!
 	AssetImporter importer;
 
-	atlas = AssetAtlas();
+	//atlas = AssetAtlas();
 
 	collision_manager = CollisionManager(&(ppu.sprites));
 
 	// step 1) read the tiles form the asset atlas
 	std::string assets_path = "./"; // TODO: change this
-	atlas.loadAssets(assets_path);
+	// atlas.loadAssets(assets_path);
 
 	// step 2) load the current background and level
 	//TODO:
-	curr_bg = atlas.getBG("DefaultBackground").tiles;
+	// curr_bg = atlas.getBG("DefaultBackground").tiles;
 
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
@@ -217,6 +217,35 @@ void PlayMode::update(float elapsed) {
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
+	
+	switch(curr_state)
+	{
+		case GAMEPLAY:
+			draw_gameplay();
+			break;
+		case WIN:
+			draw_win();
+			break;
+		case DEAD:
+			draw_dead();
+			break;
+	}
+	//--- actually draw ---
+	ppu.draw(drawable_size);
+}
+
+void PlayMode::level_complete()
+{
+	std::cout << "The level has been completed!" << std::endl;
+}
+
+void PlayMode::player_died()
+{
+	std::cout << "The player has died! :(" << std::endl;
+}
+
+void PlayMode::draw_gameplay()
+{
 	//--- set ppu state based on game state ---
 	//curr_bg = atlas.getBG("Default").tiles;
 
@@ -265,16 +294,14 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		if (i % 2) ppu.sprites[i].attributes |= 0x80; //'behind' bit
 	}
 
-	//--- actually draw ---
-	ppu.draw(drawable_size);
 }
 
-void PlayMode::level_complete()
+void PlayMode::draw_win()
 {
-	std::cout << "The level has been completed!" << std::endl;
+
 }
 
-void PlayMode::player_died()
+void PlayMode::draw_dead()
 {
-	std::cout << "The player has died! :(" << std::endl;
+
 }

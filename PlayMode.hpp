@@ -29,6 +29,7 @@ struct PlayMode : Mode {
 	// ----- asset importing -----
 	AssetAtlas atlas;
 
+
 	//functions called by main loop:
 	virtual bool handle_event(SDL_Event const &, glm::uvec2 const &window_size) override;
 	virtual void update(float elapsed) override;
@@ -67,4 +68,8 @@ struct PlayMode : Mode {
 	PPU466 ppu;
 	//current background
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
+	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_level;
+	void draw_gameplay();
+	void draw_win();
+	void draw_dead();
 };
