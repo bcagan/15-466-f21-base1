@@ -92,10 +92,15 @@ private:
 
 	BGAssetData getBGHelp(std::string name); //Searches for an individual background
 
-	//Data structure of assets loaded in should then be
-	//# of independent tiles, each tiles name size, name, data, in array (char))
-	//# of backgrounds
-	//# of bg tiles, each tiles name size, name, data, in array (char)), array of refs each packed as expected (also char array) (this is for each INDIVIDUAL BG)
+	//New updated file formats
+	// 
+	//Tile Array: # of independent tiles, each tiles name size, name, data, in array (char))
+	//
+	//Backrground: Array of tiles (see above), BGWidth*BGHeight tile ref array
+	//Notes on backround: Array of tiles is tile data itself. Could be unique to background or already loaded. Could be all or none of the tiles referenced.
+	//Tile refs are the name of the tile being used and the pallet for that specific tile index.
+	//
+	//Level Data: TBA
 
 public:
 
