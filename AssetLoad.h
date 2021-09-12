@@ -83,8 +83,8 @@ private:
 
 public:
 	AssetAtlas() {
-		tiles = std::vector<TileAssetData>(1024);
-		tileNameList.resize(1024);
+		tiles = std::vector<TileAssetData>(256); //PPU can only have max of 256 tiles
+		tileNameList.resize(256);
 		bgs.resize(16);
 		bgNameList.resize(1024);
 		defaultTile.bit0 =
