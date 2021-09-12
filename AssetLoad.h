@@ -86,13 +86,11 @@ private:
 
 	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
 	char* loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
-	char* loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
-
-	char* loadTiles(size_t n, char* in); //Loads an array of tiles
-	bool loadBGs(size_t n, char* in);  //Loads an array of backgrounds
+	bool loadBGHelp(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
+	bool loadTilesHelp(size_t n, char* in); //Loads an array of tiles1
+	char* loadFile(std::string fileName);
 
 	BGAssetData getBGHelp(std::string name); //Searches for an individual background
-	bool loadHelper(char* in);
 
 	//Data structure of assets loaded in should then be
 	//# of independent tiles, each tiles name size, name, data, in array (char))
@@ -154,8 +152,7 @@ public:
 	BGRetType getBG(std::string name); //Searches for an individual background
 	LevelRetType getLevel(std::string name);//Searched for individual level
 
-	bool loadAssets(std::string fileName); //Loads a file of assets
-	
-
+	bool loadTiles(std::string fileName); //Loads an array of tiles
+	bool loadBG(std::string fileName);  //Loads an array of backgrounds
 
 };
