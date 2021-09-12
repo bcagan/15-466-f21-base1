@@ -45,7 +45,7 @@ struct BGAssetData {
 };
 
 struct BGRetType {
-	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
+	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
 	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
 };
 
@@ -68,13 +68,14 @@ private:
 	size_t bgNum = 0;
 
 	//bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
-	bool loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
-	bool loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
+	char* loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
+	char* loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
 
-	size_t loadTiles(size_t n, char* in); //Loads an array of tiles
+	char* loadTiles(size_t n, char* in); //Loads an array of tiles
 	bool loadBGs(size_t n, char* in);  //Loads an array of backgrounds
 
-	BGAsset getBGHelp(size_t nameSize, char* name); //Searches for an individual background
+	BGAssetData getBGHelp(std::string name); //Searches for an individual background
+	bool loadHelper(char* in);
 
 	//Data structure of assets loaded in should then be
 	//# of independent tiles, each tiles name size, name, data, in array (char))
