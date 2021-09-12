@@ -44,6 +44,13 @@ BGRetType getBG(std::string name) {
 
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
 bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
+	auto unPack = [this](uint64_t* thisTile) {
+		std::array< uint8_t, 8 > bit;
+		for (size_t ind = 0; ind < 8; ind++) {
+			bit[ind] = ((uint8_t*)packedTile)[ind];
+		}
+		return bit;
+	}
 	if (tiles == NULL || tileNameList == NULL) return false; //Safety check
 	if (tileNum == tiles.size()) { //If needed, extend vector
 		tiles.resize(2 * tileNum);
@@ -53,8 +60,9 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 
 	tileNameList[tileNum].name(name,nameSize); //Load information into arrray
 	tileNameList[tileNum].nameSize = nameSize;
-	tiles[tileNum].bit0 = *packedTile;
-	tiles[tileNum].bit1 = packedTile[1];
+	tiles[tileNum].bit0 = unPack(packedTile);
+	tiles[tileNum].bit1 = unPack(packedTile+1);
+
 	return true;
 }
 

@@ -8,13 +8,13 @@
 struct TileAsset { //nameSize is length of string, must be loaded in by our program
 	size_t nameSize; 
 	std::string name; //Name in dictionary to be reffered to by code later
-	uint64_t bit0; //8x8 tile representing first 2 colors, bottom is top row, left to right
-	uint64_t bit1; //Second 2 colors (3,4)
+	std::array< uint8_t, 8 > bit0; //8x8 tile representing first 2 colors, bottom is top row, left to right
+	std::array< uint8_t, 8 > bit1; //Second 2 colors (3,4)
 };
 
 struct TileAssetData { //Tile without name info
-	uint64_t bit0; //8x8 tile representing first 2 colors, bottom is top row, left to right
-	uint64_t bit1; //Second 2 colors (3,4)
+	std::array< uint8_t, 8 > bit0; //8x8 tile representing first 2 colors, bottom is top row, left to right
+	std::array< uint8_t, 8 > bit1; //Second 2 colors (3,4)
 };
 
 struct AssetName {
@@ -67,7 +67,7 @@ private:
 	std::vector<AssetName> bgNameList;
 	size_t bgNum = 0;
 
-	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
+	//bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
 	bool loadBGRefs(size_t nameSize, char* name, char* packedBackground); //Loads an individual background
 	bool loadBG(size_t nameSize, char* name, char* packedBackground); //Loads an individual background and unique tiles. (Seperates tile array from background)
 
@@ -88,23 +88,23 @@ public:
 		bgs.resize(16);
 		bgNameList.resize(1024);
 		defaultTile.bit0 =
-			(uint64_t)(0b01010101) << 56 | 
-			(uint64_t)(0b10101010) << 48 | 
-			(uint64_t)(0b01010101) << 40 | 
-			(uint64_t)(0b10101010) << 32 | 
-			(uint64_t)(0b01010101) << 24 | 
-			(uint64_t)(0b10101010) << 16 | 
-			(uint64_t)(0b01010101) << 8 | 
-			(uint64_t)(0b10101010);
-		defaultTile.bit1 = 
-			(uint64_t)(0b10101010) << 56 |
-			(uint64_t)(0b01010101) << 48 |
-			(uint64_t)(0b10101010) << 40 |
-			(uint64_t)(0b01010101) << 32 |
-			(uint64_t)(0b10101010) << 24 |
-			(uint64_t)(0b01010101) << 16 |
-			(uint64_t)(0b10101010) << 8 |
-			0b01010101;
+		{	0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101, };
+		defaultTile.bit1 =
+		{	0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010,
+			0b01010101,
+			0b10101010, };
 		defaultTile.name = "Default";
 		defaultTile.nameSize = 7;
 
@@ -135,6 +135,7 @@ public:
 	BGRetType getBG(std::string name); //Searches for an individual background
 
 	bool loadAssets(std::string fileName); //Loads a file of assets
+	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
 
 
 };
