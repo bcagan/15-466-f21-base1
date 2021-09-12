@@ -11,6 +11,7 @@ class CollisionManager
 {
 	public:
 
+		CollisionManager() {};
 		CollisionManager(std::array< PPU466::Sprite, 64 > *s);
 		~CollisionManager() {};
 

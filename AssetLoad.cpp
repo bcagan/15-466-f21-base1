@@ -1,10 +1,11 @@
-#include "AssetLoad.h"
+#include "AssetLoad.hpp"
 #include <cstdio>
 #include <vector>
 #include "PPU466.hpp"
 #include <string>
 #include "data_path.hpp"
 
+/*
 
 //Trys to find (linear search) a tile with the name given by the user. If it doesn't exist, gives default tile
 TileAssetData AssetAtlas::getTile(std::string name) {
@@ -29,10 +30,10 @@ BGAssetData AssetAtlas::getBGHelp(std::string name) {
 
 //Takes a user's inputted name and tries to find a background using getBHHelp matching it. If it can't find it, uses default background
 //Coverts refs into proper background tiles with the pallets from the refs.
-BGRetType getBG(std::string name) {
-	std::array< TileRef, BackgroundWidth* BackgroundHeight > thisBG = (getBGHelp(name)).data; //Get reference array
+BGRetType AssetAtlas::getBG(std::string name) {
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > thisBG = (getBGHelp(name)).data; //Get reference array
 	BGRetType retBG = new BGRetType;
-	for (size_t ind = 0; ind < backgroundHeight * backgroundWidth; ind++) {
+	for (size_t ind = 0; ind < PPU466::backgroundHeight * PPU466::backgroundWidth; ind++) {
 		TileRef thisTile = thisBG[ind]; //Get tile from each reference and put into the return aray
 		TileAssetData thisTileData = getTile(thisTile.name);
 		retBG.tiles[ind].bit0 = thisTileData.bit0;
@@ -51,7 +52,7 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 	}
 	tileNum++;
 
-	tileNameList[tileNum].name(name,nameSize); //Load information into arrray
+	tileNameList[tileNum].name = name; //Load information into arrray
 	tileNameList[tileNum].nameSize = nameSize;
 	tiles[tileNum].bit0 = *packedTile;
 	tiles[tileNum].bit1 = packedTile[1];
@@ -62,10 +63,10 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 size_t AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground) {
 
 	auto unPack = [this]() { //Lambda to interpret packed background data as an array of tileRefs
-		//BackgroundHeight * BackgroundWidth in size
-		std::array< TileRef, BackgroundWidth* BackgroundHeight > retBackground;
+		//PPU466::BackgroundHeight * PPU466::BackgroundWidth in size
+		std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > retBackground;
 		size_t refSize = sizeof(TileRef);
-		for (size_t whichTile = 0; whichTile < BackgroundWidth * BackgroundHeight; whichTile++) {
+		for (size_t whichTile = 0; whichTile < PPU466::BackgroundWidth * PPU466::BackgroundHeight; whichTile++) {
 			retBackground[whichTile] = ((TileRef*)(packedBackground))[whichTile];
 		}
 		return retBackground;
@@ -78,10 +79,10 @@ size_t AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackgroun
 	}
 	bgNum++;
 
-	bgNameList[bgNum].name(name,nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
+	bgNameList[bgNum].name = name; //Load name, nameSize, and newly created tileRef array into back of bg data vector
 	bgNameList[bgNum].nameSize = nameSize;
 	bgs[bgNum].background = unPack();
-	return (size_t)(packedBackground+ (BackgroundWidth * BackgroundHeight * sizeof(TileRef))); //Return adress (as size_t) of next background
+	return (size_t)(packedBackground+ (PPU466::BackgroundWidth * PPU466::BackgroundHeight * sizeof(TileRef))); //Return adress (as size_t) of next background
 }
 
 size_t loadTiles(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
@@ -107,7 +108,8 @@ size_t loadBG(size_t nameSize, char* name, char* packedBackground) {
 	return loadBGRefs(nameSize, name, packedBackground);  //Load the reference array
 }
 
-bool loadBGs(size_t n, char* in) {  //Loads an array of backgrounds*/
+
+bool loadBGs(size_t n, char* in) {  //Loads an array of backgrounds
 	char* nextBG = in;
 	for (size_t index = 0; index < n; index++) {
 		size_t* nameSize = (size_t*)nextBG;
@@ -145,3 +147,5 @@ bool loadAssets(std::string fileName) {
 	return loadHelper(dataString);
 }
 
+
+*/

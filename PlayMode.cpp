@@ -17,6 +17,8 @@ PlayMode::PlayMode() {
 	AssetImporter importer;
 
 	atlas = AssetAtlas();
+
+	collision_manager = CollisionManager(&(ppu.sprites));
 	//TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
@@ -194,10 +196,21 @@ void PlayMode::update(float elapsed) {
 	right.downs = 0;
 	up.downs = 0;
 	down.downs = 0;
+
+	//if player collides with goal, win the game
+	if (collision_manager.Collides(player_tile_index, goal_tile_index))
+	{
+		level_complete();
+	}
+
+	//TODO: if player collides with a light, subtract health
+
+	//TODO: if the player is in shadow, add health
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//--- set ppu state based on game state ---
+	//curr_bg = atlas.getBG("Default").tiles;
 
 	//background color will be some hsv-like fade:
 	ppu.background_color = glm::u8vec4(
@@ -223,11 +236,19 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//player sprite:
 	ppu.sprites[0].x = int32_t(player_at.x);
 	ppu.sprites[0].y = int32_t(player_at.y);
-	ppu.sprites[0].index = 33;
+	ppu.sprites[0].index = player_tile_index;
 	ppu.sprites[0].attributes = 7;
 
+	//goal sprite
+	/*
+	 * ppu.sprites[1].x = int32_t(goal_at.x);
+	 * ppu.sprites[1].y = int32_t(goal_at.y);
+	 * ppu.sprites[1].index = <GOAL SPRITE TILE TABLE INDEX>;
+	 * ppu.sprites[1].attributes = <GOAL ATTRIBUTES>;
+	*/
+
 	//some other misc sprites:
-	for (uint32_t i = 1; i < 63; ++i) {
+	for (uint32_t i = 2; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
@@ -238,4 +259,14 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	//--- actually draw ---
 	ppu.draw(drawable_size);
+}
+
+void PlayMode::level_complete()
+{
+	std::cout << "The level has been completed!" << std::endl;
+}
+
+void PlayMode::player_died()
+{
+	std::cout << "The player has died! :(" << std::endl;
 }
