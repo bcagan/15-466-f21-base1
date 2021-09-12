@@ -40,6 +40,9 @@ struct PlayMode : Mode {
 	//----- game state -----
 	//player position:
 	glm::vec2 player_at = glm::vec2(0.0f);
+
+	//player velocity
+	glm::vec2 player_velocity = glm::vec2(0.0f);
 	unsigned player_tile_index = 33;
 	glm::vec2 goal_at = glm::vec2(200, 200);
 	unsigned goal_tile_index = 34;
@@ -50,14 +53,18 @@ struct PlayMode : Mode {
 	void subtract_health(int amt) {health -= amt; if (health < 0) player_died(); }
 	void player_died(); // TODO
 
-	GameState curr_state;
-	GameState next_state;
+	float gravity = -120.0f;
+	float max_jump_time = 0.4f;
+	float jump_speed = 60.0f;
+	bool jumping = false;
+	bool grounded = false;
 
 	//input tracking:
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up;
+		float held = 0.0f; //Only used for spacebar!
+	} left, right, down, up, space;
 
 	//some weird background animation:
 	float background_fade = 0.0f;

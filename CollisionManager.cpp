@@ -14,7 +14,7 @@ bool CollisionManager::Collides(int s1, int s2)
 {
 	PPU466::Sprite t1 = (*sprites)[s1];
 	PPU466::Sprite t2 = (*sprites)[s2];
-	unsigned tSize = 8; //tile size
+	int tSize = 8; //tile size
 	
 	//check whether t2 is inside collidable x range of t1
 	if ((t1.x > t2.x && t1.x - t2.x < tSize + 1) ||
