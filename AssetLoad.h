@@ -134,7 +134,7 @@ public:
 	TileAssetData getTile(std::string name); //Gives tile of given name
 	BGRetType getBG(std::string name); //Searches for an individual background
 
-	bool loadAssets(/* needs to be file input*/); //Loads a file of assets
+	bool loadAssets(std::string fileName); //Loads a file of assets
 
 
 };
