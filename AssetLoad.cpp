@@ -23,7 +23,7 @@ BGAssetData AssetAtlas::getBGHelp(std::string name) {
 		AssetName curBG = bgNameList[index];
 		if (curBG.name.compare(name) == 0) return bgs[index];
 	}
-//	std::cout << "error: could not find background ''" << name << "'' in atlas.\n Using default background.\n";
+	std::cout << "error: could not find background ''" << name << "'' in atlas.\n Using default background.\n";
 	return defaultBGData;
 }
 
