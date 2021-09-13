@@ -43,6 +43,7 @@ struct PlayMode : Mode {
 	//----- game state -----
 	//player position:
 	glm::vec2 player_at = glm::vec2(0.0f);
+	glm::vec2 wall_at = glm::vec2(0.0f);
 
 	//player velocity
 	glm::vec2 player_velocity = glm::vec2(0.0f);

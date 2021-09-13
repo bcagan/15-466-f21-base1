@@ -17,7 +17,7 @@ PlayMode::PlayMode() {
 	AssetImporter importer;
 
 	//atlas = AssetAtlas();
-
+	wall_at = glm::vec2(PPU466::ScreenWidth / 2, 1);
 	collision_manager = CollisionManager(&(ppu.sprites));
 
 	// step 1) read the tiles form the asset atlas
@@ -274,6 +274,7 @@ void PlayMode::update(float elapsed) {
 	}
 
 	// ---- collision ------
+	/*
 	auto collides = [this] (int s1, int s2)
 	{
 		PPU466::Sprite t1 = ppu.sprites[s1];
@@ -295,31 +296,28 @@ void PlayMode::update(float elapsed) {
 		}
 		return false;
 	};
+	*/
 
-	PPU466::Sprite player_sprite = ppu.sprites[player_sprite_index];
-
-		PPU466::Sprite curr_sprite = ppu.sprites[2];
-		if (collides(player_sprite_index, 2))
-		{
-			if (curr_sprite.x + 1 >= player_sprite.x) // collidable object (CO) to the left
-			{
-				std::cout << "Collides to the left!" << std::endl;
-				player_at.x = curr_sprite.x - 8;
-			} else if (curr_sprite.x - 1 <= player_sprite.x + 7) // CO to the right
-			{
-				std::cout << "Collides to the right!" << std::endl;
-				player_at.x = curr_sprite.x + 1;
-			} if (curr_sprite.y + 1 >= player_sprite.y) // CO below
-			{
-				std::cout << "Collides below!" << std::endl;
-				player_at.y = curr_sprite.y - 1;
-			} if (curr_sprite.y - 1 <= player_sprite.y + 7) // CO above
-			{
-				std::cout << "Collides above!" << std::endl;
-				player_at.y = curr_sprite.y + 8;
-			}
+	{ //handle player collisions with walls
+		unsigned player_at_floor_x = (int)floor(player_at.x);
+		unsigned player_at_floor_y = (int)floor(player_at.y);
+		std::cout << player_at_floor_x << "," << player_at_floor_y << " " << wall_at.x << "," << wall_at.y << std::endl;
+		if (player_at_floor_x + 8 == wall_at.x && wall_at.y - 7 <= player_at_floor_y && player_at_floor_y <= wall_at.y + 7)
+		{ //collides to the left of wall_at
+			player_at.x = wall_at.x - 8;
+		} else if (player_at_floor_x - 8  + 1 == wall_at.x && wall_at.y - 7 <= player_at_floor_y && player_at_floor_y <= wall_at.y + 7)
+		{ //collides to the right
+			player_at.x = wall_at.x + 8;
+		} else if (player_at_floor_y - 8 + 1 == wall_at.y && wall_at.x - 7 <= player_at_floor_x && player_at_floor_x <= wall_at.x + 7)
+		{ //collides above
+			player_at.y = wall_at.y + 8;
+			player_velocity.y = 0;
+		} else if (player_at_floor_y + 8 == wall_at.y && wall_at.x - 7 <= player_at_floor_x && player_at_floor_x <= wall_at.x + 7)
+		{ //collides below
+			player_at.y = wall_at.y - 8;
 		}
-
+	}
+	
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
@@ -407,8 +405,8 @@ void PlayMode::draw_gameplay()
 	ppu.sprites[1].attributes = 7;
 
 	//test wall
-	ppu.sprites[2].x = int32_t(PPU466::ScreenHeight / 2);
-	ppu.sprites[2].y = int32_t(1);
+	ppu.sprites[2].x = wall_at.x;
+	ppu.sprites[2].y = wall_at.y;
 	ppu.sprites[2].index = 35;
 	ppu.sprites[2].attributes = 7;
 	

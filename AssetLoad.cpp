@@ -149,7 +149,6 @@ char* AssetAtlas::loadFile(std::string fileName) {
 	return dataString;
 	return NULL;
 }
-*/
 
 //Wrapper function that takes a file name and sets up the data to load a tile array
 size_t AssetAtlas::loadTiles(std::string fileName) {
@@ -180,3 +179,4 @@ bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  backgroun
 	return (loadBGHelp(*nameSize, name, bgArray, true)); //Load background given extracted variables
 }
 
+*/
