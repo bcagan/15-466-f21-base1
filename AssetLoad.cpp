@@ -144,7 +144,7 @@ char* AssetAtlas::loadFile(std::string fileName) {
 	std::ifstream assetFile = std::ifstream(path.c_str(), std::ios::binary);
 	assert(assetFile.is_open());
 
-	auto getSize = [this](std::ifstream assetFile) {
+	auto getSize = [](std::ifstream &assetFile) {
 		size_t fChars = 0;
 		while (assetFile.get() != EOF) {
 			fChars += 1;
@@ -172,11 +172,11 @@ size_t AssetAtlas::loadTiles(std::string fileName) {
 bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground, bool isBG) { //isBG == true -> background, isBG == false -> level data
 	if (isBG) {
 		size_t* nTiles = (size_t*)packedBackground;
-		if (nTiles == NULL) return 0;
+		if (nTiles == NULL) return false;
 		packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
-		packedBackground = (char*)(loadTiles(*nTiles));  //The return value is the start of the reference array
+		packedBackground = (char*)(loadTiles(name));  //The return value is the start of the reference array
 	}
-	if (!packedBackground) return 0; 
+	if (!packedBackground) return false; 
 	return loadBGRefs(nameSize, name, packedBackground, isBG);  //Load the reference array
 }
 
