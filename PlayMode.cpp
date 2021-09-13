@@ -9,12 +9,22 @@
 
 #include <random>
 
+#include "CollisionManager.hpp"
+#define ERROR_FLOAT 0.000005f
 
 PlayMode::PlayMode() {
 
 	//Load in new files, and clean out the old script!
-	importer = AssetImporter();
-	atlas = AssetAtlas();
+	AssetImporter importer;
+
+	//Regenerate all of our files!
+	importer.WritePngsToFile();
+
+	//Create a new atlas, load all saved pngs into it.
+	AssetAtlas atlas;
+	importer.LoadTiles(atlas);
+
+	//atlas = AssetAtlas();
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 \
 	// step 1) read the tiles form the asset atlas
@@ -369,68 +379,86 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	assert(innerTheta != 0.0f && innerTheta != 90.0f && outerTheta != 0.0f && outerTheta != 90.0f);
 
 	//Derived from https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
-	float 	minX = objPos.x + 4.f;
-	float  maxX = objPos.x - 4.f;
-	if (abs(lightPos.x - (objPos.x - 4.f)) < abs(lightPos.x - (objPos.x + 4.f))) {
-		minX = objPos.x - 4.f; maxX = objPos.x + 4.f;
-	}
-	glm::vec2 b0 = glm::vec2(minX, objPos.y + 4.f); //close
-	glm::vec2 b1 = glm::vec2(maxX, objPos.y - 4.f); //far
 
-	//Inner left
-	bool doesLeft = true;
-	bool doesRight = true;
-	float tx = (b0.x - lightPos.x) / -cos(innerTheta);//? is this dX?
-	float ty = (b0.y - lightPos.y) / -sin(innerTheta);
-	float tMinInLeft = (tx > ty) ? tx : ty;
-	float t1x = (b1.x - lightPos.x) / -cos(innerTheta);//? is this dX?
-	float t1y = (b1.y - lightPos.y) / -sin(innerTheta);
-	float tMaxInLeft = (tx < ty) ? tx : ty;
-	//intersection check
-	if (tx > t1y || ty > t1x) doesLeft = false;
+	auto getVal = [this](glm::vec2 lightPos, glm::vec2 objPos, float theta){
+		
+		float minX = objPos.x + 4.f;
+		float maxX = objPos.x - 4.f;
+		if (abs(lightPos.x - (objPos.x - 4.f)) < abs(lightPos.x - (objPos.x + 4.f))) {
+			minX = objPos.x - 4.f; maxX = objPos.x + 4.f;
+		}
+		glm::vec2 b0 = glm::vec2(minX, objPos.y + 4.f); //close
+		glm::vec2 b1 = glm::vec2(maxX, objPos.y - 4.f); //far	
 
-	//Inner right
-	tx = (b0.x - lightPos.x) / -cos(outerTheta);//? is this dX?
-	ty = (b0.y - lightPos.y) / -sin(outerTheta);
-	float tMinInRight = (tx > ty) ? tx : ty;
-	t1x = (b1.x - lightPos.x) / -cos(outerTheta);//? is this dX?
-	t1y = (b1.y - lightPos.y) / -sin(outerTheta);
-	float tMaxInRight = (tx < ty) ? tx : ty;
-	//intersection check
-	if (tx > t1y || ty > t1x) doesRight = false;
-	//Inner val
-	float innerVal = 0.0f;
-	if (doesLeft && doesRight) { //If both left and right intersect box
-		glm::vec2 minIntLeft = glm::vec2(-tMinInLeft * cos(innerTheta) + lightPos.x,
+
+		bool doesLeft = true;
+		bool doesRight = true;
+		float tx = (b0.x - lightPos.x) / -cos(theta);//? is this dX?
+		float ty = (b0.y - lightPos.y) / -sin(theta);
+		float tMinInLeft = (tx > ty) ? tx : ty;
+		float t1x = (b1.x - lightPos.x) / -cos(theta);//? is this dX?
+		float t1y = (b1.y - lightPos.y) / -sin(theta);
+		float tMaxInLeft = (tx < ty) ? tx : ty;
+		//intersection check
+		if (tx > t1y || ty > t1x) doesLeft = false;
+
+		tx = (b0.x - lightPos.x) / cos(theta);//? is this dX?
+		ty = (b0.y - lightPos.y) / -sin(theta);
+		float tMinInRight = (tx > ty) ? tx : ty;
+		t1x = (b1.x - lightPos.x) / cos(theta);//? is this dX?
+		t1y = (b1.y - lightPos.y) / -sin(theta);
+		float tMaxInRight = (tx < ty) ? tx : ty;
+		//intersection check
+		if (tx > t1y || ty > t1x) doesRight = false;
+		//Inner val
+		float retVal = 0.0f;
+		if (doesLeft && doesRight) { //If both left and right intersect box
+			glm::vec2 minIntLeft = glm::vec2(-tMinInLeft * cos(innerTheta) + lightPos.x,
 			-tMinInLeft * sin(innerTheta) + lightPos.y);
-		glm::vec2 maxIntLeft = glm::vec2(-tMaxInLeft * cos(innerTheta) + lightPos.x,
+			glm::vec2 maxIntLeft = glm::vec2(-tMaxInLeft * cos(innerTheta) + lightPos.x,
 			-tMaxInLeft * sin(innerTheta) + lightPos.y);
-		glm::vec2 minIntRight = glm::vec2(tMinInRight * cos(innerTheta) + lightPos.x,
+			glm::vec2 minIntRight = glm::vec2(tMinInRight * cos(innerTheta) + lightPos.x,
 			-tMinInRight * sin(innerTheta) + lightPos.y);
-		glm::vec2 maxIntRight = glm::vec2(tMaxInRight * cos(innerTheta) + lightPos.x,
+			glm::vec2 maxIntRight = glm::vec2(tMaxInRight * cos(innerTheta) + lightPos.x,
 			-tMaxInRight * sin(innerTheta) + lightPos.y);
 
-		//Due to location of light,we know min hits are on top, and max are on sides
-		innerVal = 64.f;
-		innerVal -= (minIntLeft.x - objPos.x + 4.f) * (maxIntLeft.y - objPos.y + 4.f) / 2;
-		innerVal -= (objPos.x + 4.f - minIntRight.x) * (objPos.y + 4.f - minIntRight.y) / 2;
-		innerVal /= 64.f;
-		inenrVal *= 2.f;
+			//Due to location of light,we know min hits are on top, and max are on sides
+			retVal = 64.f;
+			retVal -= (minIntLeft.x - objPos.x + 4.f) * (maxIntLeft.y - objPos.y + 4.f) / 2;
+			retVal -= (objPos.x + 4.f - minIntRight.x) * (objPos.y + 4.f - maxIntRight.y) / 2;
+			retVal /= 64.f;
 
-	}
-	else if (doesLeft) { //If only left does, consider right the right side of box
+		}
+		else if (doesLeft) { //If only left does
+			if(minIntLeft.y >= objPos.x + 4.f - ERROR_FLOAT){
+				retVal = 64.f;
+				retVal -= (minIntLeft.x - objPos.x + 4.f) * (maxIntLeft.y - objPos.y + 4.f) / 2;
+				retVal /= 64.f;
+			}
+			else{
+				retVal = 64.f;
+				retVal -= (manIntLeft.x - objPos.x + 4.f) * (minIntLeft.y - objPos.y + 4.f) / 2;
+				retVal/= 64.fl
+			}
+		}
+		else if (doesRight) { //If only right does, consider left the left side of box
+			if(minIntRight.y >= objPos.x + 4.f - ERROR_FLOAT){
+				retVal = 64.f;
+				retVal -= (objPos.x + 4.f - minIntRight.x) * (objPos.y + 4.f - maxIntRight.y) / 2;
+				retVal /= 64.f;
+			}
+			else{
+				retVal = 64.f;
+				retVal -= (objPos.x + 4.f - maxIntRight.x) * (objPos.y + 4.f - minIntRight.y) / 2;
+				retVal/= 64.f;
+			}
+		}
+		return retVal;
+	};
 
-	}
-	else if (doesRight) { //If only right does, consider left the left side of box
-
-	}
-	// 
-	// 	   Will do outer once inner is tested
-	//Outer left
-	//Outer right
-	//Outer val
-
-	return 0;
+	float innerVal = 2.0f*getVal(lightPos, objPos, innerTheta);
+	float outerVal = getVal(lightPos, objPos, outerTheta) - innerVal/2;
+	return roundf(innerVal + outerVal);
 }
 
 
@@ -442,13 +470,27 @@ void PlayMode::updatePallet() {
 		for (size_t y = 0; y < PPU466::BackgroundHeight; y++) {
 			glm::vec2 objPos = glm::vec2((float)(x * 8 + 4), (float)(y * 8 + 4));
 			uint8_t lightVal = 0;
-			for (size_t whichLight = 0; whichLight < lights.size(); whichLight++) {
-				uint8_t tempVal = whichLight(lights[whichLight].pos, objPos, lights[whichLight].inner, lights[whichLight].outer);
+			for (size_t whichLight = 0; whichLight < lights_at.size(); whichLight++) {
+				uint8_t tempVal = whichLight(lights_at[whichLight], objPos, lights_object[whichLight].inner, lights_object[whichLight].outer);
 				if (tempVal > lightVal) lightVal = tempVal;
 			}
 			size_t ind = y * PPU466::BackgroundWidth + x;
 			curr_bg.pallets[ind] = backgroundColors[lightVal][ind];
 		}
+	}
+}
+*/
+
+//x,y, in [256,240]
+/*void PlayMode::updateLightLevels() {
+	for (size_t objInd = 0; objInd < light_levels.size(); objInd++) {
+		glm::vec2 objPos = glm::vec2((sprits[objInd]).x + 4.f, (sprites[objInd]).y + 4.f);
+		uint8_t lightVal = 0;
+		for (size_t whichLight = 0; whichLight < lights.size(); whichLight++) {
+			uint8_t tempVal = whichLight(lights[whichLight].pos, objPos, lights[whichLight].inner, lights[whichLight].outer);
+			if (tempVal > lightVal) lightVal = tempVal;
+		}
+		lightLevels[ind] = lightVal;
 	}
 }
 */

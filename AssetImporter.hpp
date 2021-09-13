@@ -22,7 +22,9 @@ public:
 
 	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name);
 
-	std::vector<tileSaveData> LoadTiles();
+	void WritePngsToFile();
+
+	void LoadTiles(AssetAtlas atlas);
 
 	std::vector<tileSaveData> tilesToSave;
 	std::vector<char> namesToSave;
