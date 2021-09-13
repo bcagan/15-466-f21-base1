@@ -78,7 +78,6 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 	return true;
 }
 
-/*
 //Loads the reference data from the background data loaded in previously into the last entry in the background data vector
 bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground, bool isBG) {
 
@@ -120,7 +119,10 @@ bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground,
 	}
 	return true; //Return adress (as size_t) of next background
 }
+/*
 */
+
+
 bool AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
 	char* nextTile = in; //Begin marker that will be used to indicate the next tile to be loaded
 	for (int whichTile = 0; whichTile < n; whichTile++) {
@@ -134,14 +136,14 @@ bool AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a siz
 	return (size_t)nextTile;
 }
 
-/*
+
 //Takes a file name in the path of the game, and loads the data into a char*
 char* AssetAtlas::loadFile(std::string fileName) {
 	std::string path = data_path(fileName);
-	//std::ifstream assetFile(path, std::ios::binary);
+	std::ifstream assetFile(path, std::ios::binary);
 
 	//File size code from https://stackoverflow.com/questions/10712117/how-to-count-the-characters-in-a-text-file
-	size_t fileSize = (size_t)std::ios_base::streampos end_pos = assetFile.tellg();
+	size_t fileSize = (size_t)(std::ios_base::streampos end_pos = assetFile.tellg());
 	char dataString[fileSize]; //Create string of size of file
 
 	assetFile.get(dataString, fileSize); //Load file contents into string
@@ -179,4 +181,4 @@ bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  backgroun
 	return (loadBGHelp(*nameSize, name, bgArray, true)); //Load background given extracted variables
 }
 
-*/
+

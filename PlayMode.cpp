@@ -69,7 +69,7 @@ PlayMode::PlayMode() {
 	}
 
 	//wall sprite:
-	ppu.tile_table[35].bit0 = {
+	ppu.tile_table[default_wall_tile].bit0 = {
 		0b11111111,
 		0b11111111,
 		0b11111111,
@@ -81,7 +81,7 @@ PlayMode::PlayMode() {
 	};
 
 	// wall sprite:
-	ppu.tile_table[35].bit1 = {
+	ppu.tile_table[default_wall_tile].bit1 = {
 		0b00000000,
 		0b00000000,
 		0b00000000,
@@ -90,6 +90,29 @@ PlayMode::PlayMode() {
 		0b00000000,
 		0b00000000,
 		0b00000000,
+	};
+	//light sprite:
+	ppu.tile_table[default_wall_tile].bit0 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+	};
+
+	// light sprite:
+	ppu.tile_table[default_wall_tile].bit1 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
 	};
 
 	//use sprite 32 as a "player":
@@ -158,6 +181,14 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0xff, 0x00, 0xff, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	};
+
+	//wall:
+	ppu.palette_table[default_wall_pallete] = {
+		glm::u8vec4(0xff, 0x00, 0x00, 0x00),
+		glm::u8vec4(0xff, 0xff, 0x00, 0x00),
+		glm::u8vec4(0x00, 0x00, 0xff, 0x00),
+		glm::u8vec4(0xff, 0xff, 0x00, 0x00),
 	};
 
 	//used for the misc other sprites:
@@ -409,15 +440,23 @@ void PlayMode::draw_gameplay()
 	ppu.sprites[1].attributes = 7;
 
 	//platforms and walls
-	for (int i = 2; i < walls_at.size() + 2; i++)
+	int i;
+	for (i = 2; i < walls_at.size() + 2; i++)
 	{
 		ppu.sprites[i].x = walls_at[i - 2].x;
 		ppu.sprites[i].y = walls_at[i - 2].y;
-		ppu.sprites[i].index = 35;
-		ppu.sprites[i].attributes = 7;
+		ppu.sprites[i].index = default_wall_tile;
+		ppu.sprites[i].attributes = default_wall_pallete;
 	}
 
-	
+	//lights
+	for (int j = i; j < i + lights_at.size(); j++)
+	{
+		ppu.sprites[j].x = lights_at[j - i].x;
+		ppu.sprites[j].y = walls_at[j - i].y;
+		ppu.sprites[j].index = default_light_tile;
+		ppu.sprites[j].attributes = default_wall_pallete;
+	}
 	
 	//some other misc sprites:
 	for (uint32_t i = 3; i < 63; ++i) {

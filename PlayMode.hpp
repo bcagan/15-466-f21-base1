@@ -44,6 +44,7 @@ struct PlayMode : Mode {
 	//player position:
 	glm::vec2 player_at = glm::vec2(0.0f);
 	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>();
+	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>();
 
 	//player velocity
 	glm::vec2 player_velocity = glm::vec2(0.0f);
@@ -81,6 +82,9 @@ struct PlayMode : Mode {
 	//current background
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_level;
+	unsigned default_wall_tile = 35;
+	unsigned default_light_tile = 36;
+	unsigned default_wall_pallete = 8;
 	void draw_gameplay();
 	void draw_win();
 	void draw_dead();
