@@ -391,6 +391,98 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.draw(drawable_size);
 }
 
+//Lighting
+
+//Checks if object is with in outer or inner range of spotlight, and gives lighting value accordingly
+/*uint8_t PlayMode::whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta) {
+	if (objPos.y + 4.f > lightPos.y) return 0;
+	assert(innerTheta != 0.0f && innerTheta != 90.0f && outerTheta != 0.0f && outerTheta != 90.0f);
+
+	//Derived from https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+	float 	minX = objPos.x + 4.f;
+	float  maxX = objPos.x - 4.f;
+	if (abs(lightPos.x - (objPos.x - 4.f)) < abs(lightPos.x - (objPos.x + 4.f))) {
+		minX = objPos.x - 4.f; maxX = objPos.x + 4.f;
+	}
+	glm::vec2 b0 = glm::vec2(minX, objPos.y + 4.f); //close
+	glm::vec2 b1 = glm::vec2(maxX, objPos.y - 4.f); //far
+
+	//Inner left
+	bool doesLeft = true;
+	bool doesRight = true;
+	float tx = (b0.x - lightPos.x) / -cos(innerTheta);//? is this dX?
+	float ty = (b0.y - lightPos.y) / -sin(innerTheta);
+	float tMinInLeft = (tx > ty) ? tx : ty;
+	float t1x = (b1.x - lightPos.x) / -cos(innerTheta);//? is this dX?
+	float t1y = (b1.y - lightPos.y) / -sin(innerTheta);
+	float tMaxInLeft = (tx < ty) ? tx : ty;
+	//intersection check
+	if (tx > t1y || ty > t1x) doesLeft = false;
+
+	//Inner right
+	tx = (b0.x - lightPos.x) / -cos(outerTheta);//? is this dX?
+	ty = (b0.y - lightPos.y) / -sin(outerTheta);
+	float tMinInRight = (tx > ty) ? tx : ty;
+	t1x = (b1.x - lightPos.x) / -cos(outerTheta);//? is this dX?
+	t1y = (b1.y - lightPos.y) / -sin(outerTheta);
+	float tMaxInRight = (tx < ty) ? tx : ty;
+	//intersection check
+	if (tx > t1y || ty > t1x) doesRight = false;
+	//Inner val
+	float innerVal = 0.0f;
+	if (doesLeft && doesRight) { //If both left and right intersect box
+		glm::vec2 minIntLeft = glm::vec2(-tMinInLeft * cos(innerTheta) + lightPos.x,
+			-tMinInLeft * sin(innerTheta) + lightPos.y);
+		glm::vec2 maxIntLeft = glm::vec2(-tMaxInLeft * cos(innerTheta) + lightPos.x,
+			-tMaxInLeft * sin(innerTheta) + lightPos.y);
+		glm::vec2 minIntRight = glm::vec2(tMinInRight * cos(innerTheta) + lightPos.x,
+			-tMinInRight * sin(innerTheta) + lightPos.y);
+		glm::vec2 maxIntRight = glm::vec2(tMaxInRight * cos(innerTheta) + lightPos.x,
+			-tMaxInRight * sin(innerTheta) + lightPos.y);
+
+		//Due to location of light,we know min hits are on top, and max are on sides
+		innerVal = 64.f;
+		innerVal -= (minIntLeft.x - objPos.x + 4.f) * (maxIntLeft.y - objPos.y + 4.f) / 2;
+		innerVal -= (objPos.x + 4.f - minIntRight.x) * (objPos.y + 4.f - minIntRight.y) / 2;
+		innerVal /= 64.f;
+		inenrVal *= 2.f;
+
+	}
+	else if (doesLeft) { //If only left does, consider right the right side of box
+
+	}
+	else if (doesRight) { //If only right does, consider left the left side of box
+
+	}
+	// 
+	// 	   Will do outer once inner is tested
+	//Outer left
+	//Outer right
+	//Outer val
+
+	return 0;
+}
+
+
+
+
+//x,y, in [256,240]
+void PlayMode::updatePallet() {
+	for (size_t x = 0; x < PPU466::BackgroundWidth; x++) {
+		for (size_t y = 0; y < PPU466::BackgroundHeight; y++) {
+			glm::vec2 objPos = glm::vec2((float)(x * 8 + 4), (float)(y * 8 + 4));
+			uint8_t lightVal = 0;
+			for (size_t whichLight = 0; whichLight < lights.size(); whichLight++) {
+				uint8_t tempVal = whichLight(lights[whichLight].pos, objPos, lights[whichLight].inner, lights[whichLight].outer);
+				if (tempVal > lightVal) lightVal = tempVal;
+			}
+			size_t ind = y * PPU466::BackgroundWidth + x;
+			curr_bg.pallets[ind] = backgroundColors[lightVal][ind];
+		}
+	}
+}
+*/
+
 void PlayMode::level_complete()
 {
 	std::cout << "The level has been completed!" << std::endl;
