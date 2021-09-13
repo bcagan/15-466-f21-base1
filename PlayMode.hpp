@@ -26,6 +26,8 @@ struct PlayMode : Mode {
 		DEAD
 	};
 
+	GameState curr_state;
+	GameState next_state;
 	// ----- asset importing -----
 	AssetAtlas atlas;
 
@@ -45,11 +47,14 @@ struct PlayMode : Mode {
 	//player velocity
 	glm::vec2 player_velocity = glm::vec2(0.0f);
 	unsigned player_tile_index = 33;
+	unsigned player_sprite_index = 0;
 	glm::vec2 goal_at = glm::vec2(200, 200);
-	unsigned goal_tile_index = 34;
+	unsigned goal_sprite_index = 34;
+
 	int health; //the player dies when health is less than zero
+	
 	std::array<unsigned short, 64> light_levels; // the light levels of each block
-	unsigned death_screen_index; //index into sprite array for death screen background
+
 	void level_complete(); // TODO
 	void subtract_health(int amt) {health -= amt; if (health < 0) player_died(); }
 	void player_died(); // TODO
@@ -69,7 +74,6 @@ struct PlayMode : Mode {
 
 	//some weird background animation:
 	float background_fade = 0.0f;
-
 
 	//----- drawing handled by PPU466 -----
 	PPU466 ppu;
