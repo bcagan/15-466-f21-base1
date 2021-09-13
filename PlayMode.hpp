@@ -41,6 +41,7 @@ struct PlayMode : Mode {
 	glm::vec2 player_at = glm::vec2(0.0f);
 	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>();
 	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>();
+	//Can we also have a vector the same size as lights_at which indicates the light type? Could be a Light object reference
 
 	//player velocity
 	glm::vec2 player_velocity = glm::vec2(0.0f);

@@ -16,7 +16,6 @@ public:
 
 
 //TO DO
-//Implement light (not from here but other object type) with access to thetas, and, change the pos access to other light type
 //Set up pallets
 //Set up function that references object type and gets updated pallet from that (not lights)
 //Test test test!
