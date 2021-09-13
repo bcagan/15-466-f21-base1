@@ -4,6 +4,14 @@
 #include "AssetLoad.h"
 #include <glm/glm.hpp>
 
+struct tileSaveData
+{
+	int64_t bit0;
+	int64_t bit1;
+	size_t nameStart;
+	size_t nameEnd;
+};
+
 class AssetImporter {
 
 public:
@@ -12,9 +20,14 @@ public:
 	AssetImporter();
 	~AssetImporter();
 
-	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data);
+	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name);
 
-	std::vector<int64_t> tilesToSave;
+	void WritePngsToFile();
+
+	void LoadTiles(AssetAtlas atlas);
+
+	std::vector<tileSaveData> tilesToSave;
+	std::vector<char> namesToSave;
 
 	//AssetAtlas atlas;
 
@@ -23,9 +36,11 @@ private:
 	std::string extension = ".png";
 
 	std::vector<std::string> files{ 
-		"LeftBlock", 
-		"Red",
 		"TestArrow"
+	};
+
+	std::vector<std::string> names{
+		"Arrow"
 	};
 
 	

@@ -6,7 +6,6 @@
 
 #include <vector>
 #include <deque>
-#include "CollisionManager.hpp"
 
 /*
  *
@@ -37,9 +36,6 @@ struct PlayMode : Mode {
 	virtual void update(float elapsed) override;
 	virtual void draw(glm::uvec2 const &drawable_size) override;
 
-	// ----- collisions -----
-	CollisionManager collision_manager;
-
 	//----- game state -----
 	//player position:
 	glm::vec2 player_at = glm::vec2(0.0f);
@@ -55,6 +51,7 @@ struct PlayMode : Mode {
 
 	int health; //the player dies when health is less than zero
 	
+	// the index into the light_levels array must be the same index into the ppu.sprites array
 	std::array<unsigned short, 64> light_levels; // the light levels of each block
 
 	void level_complete(); // TODO
