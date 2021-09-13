@@ -86,6 +86,7 @@ struct PlayMode : Mode {
 	//Each object should have 3 pallets stored with it, which are swapped out depending on its lighting value.
 	uint8_t whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta);
 	void updatePallet();
+	void updateLightLevels();
 	//std::vector<light_object_type> lights;
 	//Need to define a light object type which has at a minimum: pos, inner, outer (vec2, float, float)
 
