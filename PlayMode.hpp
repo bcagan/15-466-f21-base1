@@ -1,6 +1,7 @@
 #include "PPU466.hpp"
 #include "Mode.hpp"
 #include "AssetLoad.h"
+#include "AssetImporter.hpp"
 
 #include <glm/glm.hpp>
 
@@ -27,9 +28,10 @@ struct PlayMode : Mode {
 
 	GameState curr_state;
 	GameState next_state;
-	// ----- asset importing -----
-	AssetAtlas atlas;
 
+	// ----- asset importing/loading -----
+	AssetAtlas atlas;
+	AssetImporter importer;
 
 	//functions called by main loop:
 	virtual bool handle_event(SDL_Event const &, glm::uvec2 const &window_size) override;

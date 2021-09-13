@@ -13,19 +13,20 @@
 PlayMode::PlayMode() {
 
 	//Load in new files, and clean out the old script!
-	AssetImporter importer;
-
+	importer = AssetImporter();
 	atlas = AssetAtlas();
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 \
 	// step 1) read the tiles form the asset atlas
-	
-
+	importer.writePngToSave("TestBackground");
+	atlas.loadBG("TestBackground");
+	importer.writePngToSave("TestLevel");
+	atlas.loadLevel("TestLevel");
 	//Remove and instead individually load tiles AND load backgrounds
 
 	// step 2) load the current background and level
 	//TODO:
-	curr_bg = atlas.getBG("DefaultBackground").tiles;
+	
 
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!

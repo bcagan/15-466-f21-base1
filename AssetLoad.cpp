@@ -193,4 +193,16 @@ bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  backgroun
 	return resVal;
 }
 
+bool AssetAtlas::loadLevel(std::string fileName) {  //Loads a file for a  background
+	char* in = loadFile(fileName); //Get data from file
+	size_t* nameSize = (size_t*)in;
+	if (nameSize == NULL) return false;
+	char* name = (in + 8);
+	char* bgArray = (name + *nameSize);
+	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,false)); //Load background given extracted variables
+	free(in);
+	return resVal;
+}
+
+
 
