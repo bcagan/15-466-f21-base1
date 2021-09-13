@@ -25,6 +25,8 @@ struct PlayMode : Mode {
 		WIN,
 		DEAD
 	};
+	GameState curr_state;
+	GameState next_state;
 
 	// ----- asset importing -----
 	AssetAtlas atlas;
