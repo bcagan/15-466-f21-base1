@@ -26,8 +26,11 @@ struct PlayMode : Mode {
 		DEAD
 	};
 
+	GameState curr_state;
+	GameState next_state;
 	// ----- asset importing -----
 	AssetAtlas atlas;
+
 
 	//functions called by main loop:
 	virtual bool handle_event(SDL_Event const &, glm::uvec2 const &window_size) override;
@@ -40,15 +43,20 @@ struct PlayMode : Mode {
 	//----- game state -----
 	//player position:
 	glm::vec2 player_at = glm::vec2(0.0f);
+	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>();
+	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>();
 
 	//player velocity
 	glm::vec2 player_velocity = glm::vec2(0.0f);
 	unsigned player_tile_index = 33;
+	unsigned player_sprite_index = 0;
 	glm::vec2 goal_at = glm::vec2(200, 200);
-	unsigned goal_tile_index = 34;
+	unsigned goal_sprite_index = 34;
+
 	int health; //the player dies when health is less than zero
+	
 	std::array<unsigned short, 64> light_levels; // the light levels of each block
-	unsigned death_screen_index; //index into sprite array for death screen background
+
 	void level_complete(); // TODO
 	void subtract_health(int amt) {health -= amt; if (health < 0) player_died(); }
 	void player_died(); // TODO
@@ -69,9 +77,15 @@ struct PlayMode : Mode {
 	//some weird background animation:
 	float background_fade = 0.0f;
 
-
 	//----- drawing handled by PPU466 -----
 	PPU466 ppu;
 	//current background
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
+	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_level;
+	unsigned default_wall_tile = 35;
+	unsigned default_light_tile = 36;
+	unsigned default_wall_pallete = 8;
+	void draw_gameplay();
+	void draw_win();
+	void draw_dead();
 };

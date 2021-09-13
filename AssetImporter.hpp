@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "AssetLoad.h"
+#include <glm/glm.hpp>
 
 class AssetImporter {
 
@@ -10,6 +11,10 @@ public:
 	//replacement for the atlas, with a fresh atlas given by atlas.
 	AssetImporter();
 	~AssetImporter();
+
+	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data);
+
+	std::vector<int64_t> tilesToSave;
 
 	//AssetAtlas atlas;
 
@@ -22,5 +27,7 @@ private:
 		"Red",
 		"TestArrow"
 	};
+
+	
 
 };

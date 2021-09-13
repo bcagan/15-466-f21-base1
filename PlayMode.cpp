@@ -16,8 +16,8 @@ PlayMode::PlayMode() {
 	//Load in new files, and clean out the old script!
 	AssetImporter importer;
 
-	atlas = AssetAtlas();
-
+	//atlas = AssetAtlas();
+	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 	collision_manager = CollisionManager(&(ppu.sprites));
 
 	// step 1) read the tiles form the asset atlas
@@ -28,7 +28,7 @@ PlayMode::PlayMode() {
 
 	// step 2) load the current background and level
 	//TODO:
-	curr_bg = atlas.getBG("DefaultBackground").tiles;
+	// curr_bg = atlas.getBG("DefaultBackground").tiles;
 
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
@@ -68,6 +68,53 @@ PlayMode::PlayMode() {
 		}
 	}
 
+	//wall sprite:
+	ppu.tile_table[default_wall_tile].bit0 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+	};
+
+	// wall sprite:
+	ppu.tile_table[default_wall_tile].bit1 = {
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+	};
+	//light sprite:
+	ppu.tile_table[default_wall_tile].bit0 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+	};
+
+	// light sprite:
+	ppu.tile_table[default_wall_tile].bit1 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+	};
+
 	//use sprite 32 as a "player":
 	ppu.tile_table[32].bit0 = {
 		0b01111110,
@@ -91,7 +138,7 @@ PlayMode::PlayMode() {
 	};
 
 	//use sprite 32 as a "player true":
-	ppu.tile_table[33].bit0 = {
+	ppu.tile_table[player_tile_index].bit0 = {
 		0b11111111,
 		0b11111111,
 		0b11111111,
@@ -101,7 +148,7 @@ PlayMode::PlayMode() {
 		0b11111111,
 		0b11111111,
 	};
-	ppu.tile_table[33].bit1 = {
+	ppu.tile_table[player_tile_index].bit1 = {
 		0b00000000,
 		0b01111110,
 		0b10111101,
@@ -134,6 +181,14 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0xff, 0x00, 0xff, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	};
+
+	//wall:
+	ppu.palette_table[default_wall_pallete] = {
+		glm::u8vec4(0xff, 0x00, 0x00, 0x00),
+		glm::u8vec4(0xff, 0xff, 0x00, 0x00),
+		glm::u8vec4(0x00, 0x00, 0xff, 0x00),
+		glm::u8vec4(0xff, 0xff, 0x00, 0x00),
 	};
 
 	//used for the misc other sprites:
@@ -206,6 +261,30 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
+	{ //handle player collisions with walls
+		for (auto w = walls_at.begin(); w < walls_at.end(); w++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			std::cout << player_at_floor_x << "," << player_at_floor_y << " " << (*w).x << "," << (*w).y << std::endl;
+			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the left of (*w)
+				player_at.x = (*w).x - 8;
+			} else if (player_at_floor_x - 8  + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the right
+				player_at.x = (*w).x + 8;
+			} else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides above
+				grounded = true;
+				player_at.y = (*w).y + 8;
+				player_velocity.y = 0;
+			} else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides below
+				player_at.y = (*w).y - 8;
+			}
+		}
+	}
+
 	constexpr float PlayerSpeed = 30.0f;
 	player_velocity.x = 0;
 	if (left.pressed) player_velocity.x -= PlayerSpeed;
@@ -249,6 +328,32 @@ void PlayMode::update(float elapsed) {
 		grounded = true;
 	}
 
+	// ---- collision ------
+	/*
+	auto collides = [this] (int s1, int s2)
+	{
+		PPU466::Sprite t1 = ppu.sprites[s1];
+		PPU466::Sprite t2 = ppu.sprites[s2];
+		int tSize = 8; //tile size
+		
+		std::cout <<(int)t1.x << " " << (int)t2.x << std::endl;
+		std::cout << (int)t1.y << " " << (int)t2.y << std::endl;
+		//check whether t2 is inside collidable x range of t1
+		if ((t1.x >= t2.x && t1.x - t2.x < tSize + 1) ||
+			(t2.x >= t1.x && t2.x - t1.x < tSize))
+		{
+			//check y range
+			if ((t1.y >= t2.y && t1.y - t2.y < tSize + 1) ||
+				(t2.y >= t1.y && t2.y - t1.y < tSize))
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+	*/
+
+	
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
@@ -258,7 +363,7 @@ void PlayMode::update(float elapsed) {
 
 
 	//if player collides with goal, win the game
-	if (collision_manager.Collides(player_tile_index, goal_tile_index))
+	if (collision_manager.Collides(player_sprite_index, goal_sprite_index))
 	{
 		level_complete();
 		next_state = WIN;
@@ -269,6 +374,35 @@ void PlayMode::update(float elapsed) {
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
+	
+	switch(curr_state)
+	{
+		case GAMEPLAY:
+			draw_gameplay();
+			break;
+		case WIN:
+			draw_win();
+			break;
+		case DEAD:
+			draw_dead();
+			break;
+	}
+	//--- actually draw ---
+	ppu.draw(drawable_size);
+}
+
+void PlayMode::level_complete()
+{
+	std::cout << "The level has been completed!" << std::endl;
+}
+
+void PlayMode::player_died()
+{
+	std::cout << "The player has died! :(" << std::endl;
+}
+
+void PlayMode::draw_gameplay()
+{
 	//--- set ppu state based on game state ---
 	//curr_bg = atlas.getBG("Default").tiles;
 
@@ -294,21 +428,38 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.background_position.y = int32_t(-0.5f * player_at.y);
 
 	//player sprite:
-	ppu.sprites[0].x = int32_t(player_at.x);
-	ppu.sprites[0].y = int32_t(player_at.y);
-	ppu.sprites[0].index = player_tile_index;
-	ppu.sprites[0].attributes = 7;
+	ppu.sprites[player_sprite_index].x = int32_t(player_at.x);
+	ppu.sprites[player_sprite_index].y = int32_t(player_at.y);
+	ppu.sprites[player_sprite_index].index = player_tile_index;
+	ppu.sprites[player_sprite_index].attributes = 7;
 
 	//goal sprite
-	/*
-	 * ppu.sprites[1].x = int32_t(goal_at.x);
-	 * ppu.sprites[1].y = int32_t(goal_at.y);
-	 * ppu.sprites[1].index = <GOAL SPRITE TILE TABLE INDEX>;
-	 * ppu.sprites[1].attributes = <GOAL ATTRIBUTES>;
-	*/
+	ppu.sprites[1].x = int32_t(goal_at.x);
+	ppu.sprites[1].y = int32_t(goal_at.y);
+	ppu.sprites[1].index = goal_sprite_index;
+	ppu.sprites[1].attributes = 7;
 
+	//platforms and walls
+	int i;
+	for (i = 2; i < walls_at.size() + 2; i++)
+	{
+		ppu.sprites[i].x = walls_at[i - 2].x;
+		ppu.sprites[i].y = walls_at[i - 2].y;
+		ppu.sprites[i].index = default_wall_tile;
+		ppu.sprites[i].attributes = default_wall_pallete;
+	}
+
+	//lights
+	for (int j = i; j < i + lights_at.size(); j++)
+	{
+		ppu.sprites[j].x = lights_at[j - i].x;
+		ppu.sprites[j].y = walls_at[j - i].y;
+		ppu.sprites[j].index = default_light_tile;
+		ppu.sprites[j].attributes = default_wall_pallete;
+	}
+	
 	//some other misc sprites:
-	for (uint32_t i = 2; i < 63; ++i) {
+	for (uint32_t i = 3; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
@@ -317,16 +468,14 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		if (i % 2) ppu.sprites[i].attributes |= 0x80; //'behind' bit
 	}
 
-	//--- actually draw ---
-	ppu.draw(drawable_size);
 }
 
-void PlayMode::level_complete()
+void PlayMode::draw_win()
 {
-	std::cout << "The level has been completed!" << std::endl;
+
 }
 
-void PlayMode::player_died()
+void PlayMode::draw_dead()
 {
-	std::cout << "The player has died! :(" << std::endl;
+
 }
