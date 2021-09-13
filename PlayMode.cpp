@@ -9,7 +9,6 @@
 
 #include <random>
 
-#include "CollisionManager.hpp"
 
 PlayMode::PlayMode() {
 
@@ -18,8 +17,7 @@ PlayMode::PlayMode() {
 
 	//atlas = AssetAtlas();
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
-	collision_manager = CollisionManager(&(ppu.sprites));
-
+\
 	// step 1) read the tiles form the asset atlas
 	//std::string assets_path = "./"; // TODO: change this
 	//atlas.loadAssets(assets_path); 
@@ -266,7 +264,6 @@ void PlayMode::update(float elapsed) {
 		{
 			unsigned player_at_floor_x = (int)floor(player_at.x);
 			unsigned player_at_floor_y = (int)floor(player_at.y);
-			std::cout << player_at_floor_x << "," << player_at_floor_y << " " << (*w).x << "," << (*w).y << std::endl;
 			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
 			{ //collides to the left of (*w)
 				player_at.x = (*w).x - 8;
@@ -327,32 +324,6 @@ void PlayMode::update(float elapsed) {
 		player_velocity.y = 0;
 		grounded = true;
 	}
-
-	// ---- collision ------
-	/*
-	auto collides = [this] (int s1, int s2)
-	{
-		PPU466::Sprite t1 = ppu.sprites[s1];
-		PPU466::Sprite t2 = ppu.sprites[s2];
-		int tSize = 8; //tile size
-		
-		std::cout <<(int)t1.x << " " << (int)t2.x << std::endl;
-		std::cout << (int)t1.y << " " << (int)t2.y << std::endl;
-		//check whether t2 is inside collidable x range of t1
-		if ((t1.x >= t2.x && t1.x - t2.x < tSize + 1) ||
-			(t2.x >= t1.x && t2.x - t1.x < tSize))
-		{
-			//check y range
-			if ((t1.y >= t2.y && t1.y - t2.y < tSize + 1) ||
-				(t2.y >= t1.y && t2.y - t1.y < tSize))
-			{
-				return true;
-			}
-		}
-		return false;
-	};
-	*/
-
 	
 	//reset button press counters:
 	left.downs = 0;
@@ -361,14 +332,13 @@ void PlayMode::update(float elapsed) {
 	down.downs = 0;
 	space.downs = 0;
 
-
 	//if player collides with goal, win the game
-	if (collision_manager.Collides(player_sprite_index, goal_sprite_index))
+	if (false) // TODO: replace with goal collision
 	{
 		level_complete();
 		next_state = WIN;
 	}
-
+	
 	//TODO: if player collides with a light, subtract health
 	//TODO: if the player is in shadow, add health
 }

@@ -88,7 +88,7 @@ private:
 	size_t levelNum = 0;
 
 	bool loadTile(size_t nameSize, char* name, uint64_t* packedTile); //Loads an individual tile
-	char* loadBGRefs(size_t nameSize, char* name, char* packedBackground, bool isBG); //Loads an individual background
+	bool loadBGRefs(size_t nameSize, char* name, char* packedBackground, bool isBG); //Loads an individual background
 	bool loadBGHelp(size_t nameSize, char* name, char* packedBackground, bool isBG); //Loads an individual background and unique tiles. (Seperates tile array from background)
 	bool loadTilesHelp(size_t n, char* in); //Loads an array of tiles1
 	char* loadFile(std::string fileName);
