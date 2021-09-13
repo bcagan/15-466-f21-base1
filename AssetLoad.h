@@ -77,8 +77,7 @@ private:
 	BGAssetData defaultBGData;
 
 	//Data strucutres are temporary for example, will be kept as vectors, resized as needed, linear searched.
-	std::vector<TileAssetData> tiles;
-	std::vector<AssetName> tileNameList;
+	
 	size_t tileNum = 0;
 	std::vector<BGAssetData> bgs;
 	std::vector<AssetName> bgNameList;
@@ -161,6 +160,9 @@ public:
 
 	};
 	~AssetAtlas() {};
+
+	std::vector<TileAssetData> tiles;
+	std::vector<AssetName> tileNameList;
 
 	TileAssetData getTile(std::string name); //Gives tile of given name
 	BGRetType getBG(std::string name); //Searches for an individual background

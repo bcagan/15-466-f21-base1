@@ -17,6 +17,11 @@
 
 AssetImporter::AssetImporter()
 {
+	
+}
+
+void AssetImporter::WritePngsToFile()
+{
 	std::string path = data_path("");
 	//Ends with wrong slash, so we remove and replace it.
 	if (path.size() > 0)
@@ -35,8 +40,8 @@ AssetImporter::AssetImporter()
 		std::vector< glm::u8vec4 > data;
 
 		std::cout << "Loading file: " << img_path << std::endl;
-		
-	#if defined(_WIN32)
+
+#if defined(_WIN32)
 		if (std::filesystem::exists(img_path))
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
@@ -46,23 +51,26 @@ AssetImporter::AssetImporter()
 		{
 			std::cout << "File does not exist!";
 		}
-	#else
+#else
 		// code for access based on https://stackoverflow.com/questions/8580606/c-c-mac-os-x-check-if-file-exists
 		int r = access(img_path.c_str(), R_OK);
 		if (r == ENOENT)
 		{
 			std::cout << "File did not exist!" << std::endl;
-		} else if (r == EACCES)
+		}
+		else if (r == EACCES)
 		{
 			std::cout << "File is not readable!" << std::endl;
-		} else if (r > 0) //file read successful
+		}
+		else if (r > 0) //file read successful
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
 			writePngToSave(size, data, asset_name);
-		} else {
+		}
+		else {
 			std::cout << "Error with file access" << std::endl;
 		}
-	#endif
+#endif
 
 		//Tiles are now all pushed back, so we need to write them out!
 		std::ofstream ofsTiles(data_path("tileSave.dat"), std::ofstream::out);
@@ -118,9 +126,41 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 
 }
 
-std::vector<tileSaveData> AssetImporter::LoadTiles()
+void AssetImporter::LoadTiles(AssetAtlas atlas)
 {
+	std::vector<tileSaveData> tileSaved;
+	std::vector<char> charSaved;
 
+	std::ifstream ifsTile(data_path("tileSave.dat"), std::ifstream::in);
+	read_chunk(ifsTile, "tile", &tileSaved);
+
+	std::ifstream ifsName(data_path("nameSave.dat"), std::ifstream::in);
+	read_chunk(ifsName, "name", &charSaved);
+
+	//Clear old tiles
+	atlas.tiles.clear();
+	atlas.tileNameList.clear();
+
+	for (int i = 0; i < tileSaved.size(); i++)
+	{
+		tileSaveData current = tileSaved[i];
+		TileAssetData assetData;
+		AssetName assetName;
+
+		//Set up asset data first
+		for (int shift = 0; i < 8; i++)
+		{
+			assetData.bit0[i] = (uint8_t)(current.bit0 >> (i * 8));
+			assetData.bit1[i] = (uint8_t)(current.bit1 >> (i * 8));
+		}
+
+		assetName.name = std::string(charSaved.begin() + current.nameStart, charSaved.begin() + current.nameEnd);
+		assetName.nameSize = assetName.name.size();
+
+		//Push them back!
+		atlas.tiles.push_back(assetData);
+		atlas.tileNameList.push_back(assetName);
+	}
 }
 
 AssetImporter::~AssetImporter()

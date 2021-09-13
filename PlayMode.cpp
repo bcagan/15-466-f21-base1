@@ -15,6 +15,13 @@ PlayMode::PlayMode() {
 	//Load in new files, and clean out the old script!
 	AssetImporter importer;
 
+	//Regenerate all of our files!
+	importer.WritePngsToFile();
+
+	//Create a new atlas, load all saved pngs into it.
+	AssetAtlas atlas;
+	importer.LoadTiles(atlas);
+
 	//atlas = AssetAtlas();
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 \
