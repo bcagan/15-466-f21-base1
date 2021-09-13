@@ -148,6 +148,7 @@ void AssetImporter::LoadTiles(AssetAtlas atlas)
 		//Set up asset data first
 		for (int shift = 0; i < 8; i++)
 		{
+			(void)shift;
 			assetData.bit0[i] = (uint8_t)(current.bit0 >> (i * 8));
 			assetData.bit1[i] = (uint8_t)(current.bit1 >> (i * 8));
 		}
