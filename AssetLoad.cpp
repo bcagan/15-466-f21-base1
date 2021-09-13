@@ -5,6 +5,7 @@
 #include <string>
 #include "data_path.hpp"
 #include <iostream>
+#include <fstream> 
 
 
 //Trys to find (linear search) a tile with the name given by the user. If it doesn't exist, gives default tile
@@ -135,26 +136,32 @@ size_t AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a s
 
 //Takes a file name in the path of the game, and loads the data into a char*
 char* AssetAtlas::loadFile(std::string fileName) {
-	/*std::string path = data_path(fileName);
-	std::ifstream assetFile(path, std::ios::binary);
-	assert(assetFile.isOpen());
+	std::string path = data_path(fileName);
+	std::ifstream assetFile = std::ifstream(path.c_str(), std::ios::binary);
+	assert(assetFile.is_open());
 
-	//File size code from https://stackoverflow.com/questions/10712117/how-to-count-the-characters-in-a-text-file
-	assetFile.seekg(0, std::ios_base::end);
-	size_t fileSize = (size_t)std::ios_base::streampos end_pos = assetFile.tellg();
-	char dataString[fileSize]; //Create string of size of file
-
-	assetFile.get(dataString, fileSize); //Load file contents into string
+	auto getSize = [this](std::ifstream assetFile) {
+		size_t fChars = 0;
+		while (assetFile.get() != EOF) {
+			fChars += 1;
+		}
+		return fChars;
+	};
+	size_t fChars = getSize(assetFile);
+	char* dataString = new char[fChars + 1]; //I'm sorry for doing Malloc, we couldn't find a different solution
+	dataString[fChars] = '\0';
+	assetFile.get(dataString, fChars); //Load file contents into string
 	assetFile.close();
-	return dataString;*/
-	return NULL;
+	return dataString;
 }
 
 //Wrapper function that takes a file name and sets up the data to load a tile array
 size_t AssetAtlas::loadTiles(std::string fileName) {
 	char* fileData = loadFile(fileName); //Get data from file
 	size_t n = *((size_t*)fileData);
-	return loadTilesHelp(n, (fileData + 8));
+	size_t resVal = loadTilesHelp(n, (fileData + 8));
+	free(fileData);
+	return resVal;
 }
 
 //Wrapper for loading a backgrounds tile and tile reference arrays
@@ -175,7 +182,9 @@ bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  backgroun
 	if (nameSize == NULL) return false;
 	char* name = (in + 8);
 	char* bgArray = (name + *nameSize);
-	return (loadBGHelp(*nameSize, name, bgArray,true)); //Load background given extracted variables
+	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,true)); //Load background given extracted variables
+	free(in);
+	return resVal;
 }
 
 
