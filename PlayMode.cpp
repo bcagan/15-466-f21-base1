@@ -17,7 +17,7 @@ PlayMode::PlayMode() {
 	AssetImporter importer;
 
 	//atlas = AssetAtlas();
-	wall_at = glm::vec2(PPU466::ScreenWidth / 2, 1);
+	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 	collision_manager = CollisionManager(&(ppu.sprites));
 
 	// step 1) read the tiles form the asset atlas
@@ -230,6 +230,30 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
+	{ //handle player collisions with walls
+		for (auto w = walls_at.begin(); w < walls_at.end(); w++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			std::cout << player_at_floor_x << "," << player_at_floor_y << " " << (*w).x << "," << (*w).y << std::endl;
+			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the left of (*w)
+				player_at.x = (*w).x - 8;
+			} else if (player_at_floor_x - 8  + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the right
+				player_at.x = (*w).x + 8;
+			} else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides above
+				grounded = true;
+				player_at.y = (*w).y + 8;
+				player_velocity.y = 0;
+			} else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides below
+				player_at.y = (*w).y - 8;
+			}
+		}
+	}
+
 	constexpr float PlayerSpeed = 30.0f;
 	player_velocity.x = 0;
 	if (left.pressed) player_velocity.x -= PlayerSpeed;
@@ -298,25 +322,6 @@ void PlayMode::update(float elapsed) {
 	};
 	*/
 
-	{ //handle player collisions with walls
-		unsigned player_at_floor_x = (int)floor(player_at.x);
-		unsigned player_at_floor_y = (int)floor(player_at.y);
-		std::cout << player_at_floor_x << "," << player_at_floor_y << " " << wall_at.x << "," << wall_at.y << std::endl;
-		if (player_at_floor_x + 8 == wall_at.x && wall_at.y - 7 <= player_at_floor_y && player_at_floor_y <= wall_at.y + 7)
-		{ //collides to the left of wall_at
-			player_at.x = wall_at.x - 8;
-		} else if (player_at_floor_x - 8  + 1 == wall_at.x && wall_at.y - 7 <= player_at_floor_y && player_at_floor_y <= wall_at.y + 7)
-		{ //collides to the right
-			player_at.x = wall_at.x + 8;
-		} else if (player_at_floor_y - 8 + 1 == wall_at.y && wall_at.x - 7 <= player_at_floor_x && player_at_floor_x <= wall_at.x + 7)
-		{ //collides above
-			player_at.y = wall_at.y + 8;
-			player_velocity.y = 0;
-		} else if (player_at_floor_y + 8 == wall_at.y && wall_at.x - 7 <= player_at_floor_x && player_at_floor_x <= wall_at.x + 7)
-		{ //collides below
-			player_at.y = wall_at.y - 8;
-		}
-	}
 	
 	//reset button press counters:
 	left.downs = 0;
@@ -398,17 +403,21 @@ void PlayMode::draw_gameplay()
 	ppu.sprites[player_sprite_index].attributes = 7;
 
 	//goal sprite
-
 	ppu.sprites[1].x = int32_t(goal_at.x);
 	ppu.sprites[1].y = int32_t(goal_at.y);
 	ppu.sprites[1].index = goal_sprite_index;
 	ppu.sprites[1].attributes = 7;
 
-	//test wall
-	ppu.sprites[2].x = wall_at.x;
-	ppu.sprites[2].y = wall_at.y;
-	ppu.sprites[2].index = 35;
-	ppu.sprites[2].attributes = 7;
+	//platforms and walls
+	for (int i = 2; i < walls_at.size() + 2; i++)
+	{
+		ppu.sprites[i].x = walls_at[i - 2].x;
+		ppu.sprites[i].y = walls_at[i - 2].y;
+		ppu.sprites[i].index = 35;
+		ppu.sprites[i].attributes = 7;
+	}
+
+	
 	
 	//some other misc sprites:
 	for (uint32_t i = 3; i < 63; ++i) {
