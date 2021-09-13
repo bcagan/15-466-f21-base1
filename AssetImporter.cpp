@@ -24,9 +24,11 @@ AssetImporter::AssetImporter()
 		path.pop_back();
 	}
 
-	for (std::string filename : files)
+	for (int i = 0; i < files.size(); i++)
 	{
-		
+		std::string filename = files[i];
+		std::string asset_name = names[i];
+
 		std::string img_path = path + subPath + filename + extension;
 
 		glm::uvec2 size;
@@ -38,7 +40,7 @@ AssetImporter::AssetImporter()
 		if (std::filesystem::exists(img_path))
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
-			writePngToSave(size, data);
+			writePngToSave(size, data, asset_name);
 		}
 		else
 		{
@@ -56,20 +58,23 @@ AssetImporter::AssetImporter()
 		} else if (r > 0) //file read successful
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
-			writePngToSave(size, data);
+			writePngToSave(size, data, asset_name);
 		} else {
 			std::cout << "Error with file access" << std::endl;
 		}
 	#endif
 
 		//Tiles are now all pushed back, so we need to write them out!
-		std::ofstream ofs(path + "\\tileSave.dat", std::ofstream::out);
-		write_chunk("tile", tilesToSave, &ofs);
+		std::ofstream ofsTiles(data_path("tileSave.dat"), std::ofstream::out);
+		write_chunk("tile", tilesToSave, &ofsTiles);
+
+		std::ofstream ofsNames(data_path("nameSave.dat"), std::ofstream::out);
+		write_chunk("name", namesToSave, &ofsNames);
 	}
 }
 
 //Cheap an easy way right now is to use the RBG data
-void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data)
+void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name)
 {
 	if (size.x != 8 || size.y != 8)
 	{
@@ -98,9 +103,23 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 		}
 	}
 
-	tilesToSave.push_back(bit0);
-	tilesToSave.push_back(bit1);
+	tileSaveData save_data;
 
+	save_data.bit0 = bit0;
+	save_data.bit1 = bit1;
+	save_data.nameStart = namesToSave.size();
+	save_data.nameEnd = namesToSave.size() + name.size();
+
+	tilesToSave.push_back(save_data);
+
+	//Copy the name in!
+	std::copy(name.begin(), name.end(), std::back_inserter(namesToSave));
+
+
+}
+
+std::vector<tileSaveData> AssetImporter::LoadTiles()
+{
 
 }
 
