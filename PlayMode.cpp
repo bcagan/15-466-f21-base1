@@ -470,7 +470,7 @@ void PlayMode::updatePallet() {
 			glm::vec2 objPos = glm::vec2((float)(x * 8 + 4), (float)(y * 8 + 4));
 			uint8_t lightVal = 0;
 			for (size_t whichLight = 0; whichLight < lights.size(); whichLight++) {
-				uint8_t tempVal = whichLight(lights[whichLight].pos, objPos, lights[whichLight].inner, lights[whichLight].outer);
+				uint8_t tempVal = whichLight(lights[whichLight].object.pos, objPos, lights[whichLight].inner, lights[whichLight].outer);
 				if (tempVal > lightVal) lightVal = tempVal;
 			}
 			size_t ind = y * PPU466::BackgroundWidth + x;
