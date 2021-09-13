@@ -77,6 +77,19 @@ struct PlayMode : Mode {
 	//some weird background animation:
 	float background_fade = 0.0f;
 
+
+
+
+	//Lighting
+	std::array<std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight>
+		, 3> backgroundColors; //0 = dark, 1 = partially lit, 2 = lit, each an array of pallets
+	//Each object should have 3 pallets stored with it, which are swapped out depending on its lighting value.
+	uint8_t whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta);
+	void updatePallet();
+	//std::vector<light_object_type> lights;
+	//Need to define a light object type which has at a minimum: pos, inner, outer (vec2, float, float)
+
+
 	//----- drawing handled by PPU466 -----
 	PPU466 ppu;
 	//current background
