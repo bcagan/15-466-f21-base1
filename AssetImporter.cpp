@@ -73,7 +73,7 @@ AssetImporter::AssetImporter()
 	}
 }
 
-//Cheap an easy way right now is to use the RBG data
+//Cheap and easy way right now is to use the RBG data
 void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name)
 {
 	if (size.x != 8 || size.y != 8)
@@ -114,13 +114,11 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 
 	//Copy the name in!
 	std::copy(name.begin(), name.end(), std::back_inserter(namesToSave));
-
-
 }
 
 std::vector<tileSaveData> AssetImporter::LoadTiles()
 {
-
+	return std::vector<tileSaveData>();
 }
 
 AssetImporter::~AssetImporter()
