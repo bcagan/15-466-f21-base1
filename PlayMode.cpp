@@ -20,7 +20,6 @@ PlayMode::PlayMode() {
 	importer.WritePngsToFile();
 
 	//Create a new atlas, load all saved pngs into it.
-	AssetAtlas atlas;
 	importer.LoadTiles(atlas);
 
 	//atlas = AssetAtlas();

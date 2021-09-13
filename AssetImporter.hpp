@@ -3,6 +3,7 @@
 #include <string>
 #include "AssetLoad.h"
 #include <glm/glm.hpp>
+#include "PPU466.hpp"
 
 struct tileSaveData
 {
@@ -26,6 +27,8 @@ public:
 
 	void LoadTiles(AssetAtlas atlas);
 
+	std::array<uint16_t, PPU466::BackgroundWidth * PPU466::BackgroundHeight> GetBackgroundFromPNG();
+
 	std::vector<tileSaveData> tilesToSave;
 	std::vector<char> namesToSave;
 
@@ -34,6 +37,8 @@ public:
 private:
 	std::string subPath = "\\tiles\\";
 	std::string extension = ".png";
+
+	std::string backgroundName = "background.png";
 
 	std::vector<std::string> files{ 
 		"TestArrow"
