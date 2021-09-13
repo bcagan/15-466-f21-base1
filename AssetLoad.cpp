@@ -150,7 +150,7 @@ char* AssetAtlas::loadFile(std::string fileName) {
 }
 
 //Wrapper function that takes a file name and sets up the data to load a tile array
-bool AssetAtlas::loadTiles(std::string fileName) {
+size_t* AssetAtlas::loadTiles(std::string fileName) {
 	char* fileData = loadFile(fileName); //Get data from file
 	size_t n = *((size_t*)fileData);
 	return loadTilesHelp(n, (fileData + 8));

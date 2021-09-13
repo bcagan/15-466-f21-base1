@@ -166,7 +166,7 @@ public:
 	BGRetType getBG(std::string name); //Searches for an individual background
 	LevelRetType getLevel(std::string name);//Searches for individual level
 
-	bool loadTiles(std::string fileName); //Loads an array of tiles
+	size_t* loadTiles(std::string fileName); //Loads an array of tiles
 	bool loadBG(std::string fileName);  //Loads an array of backgrounds
 
 };
