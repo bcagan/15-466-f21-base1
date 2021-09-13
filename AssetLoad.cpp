@@ -78,6 +78,7 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 	return true;
 }
 
+/*
 //Loads the reference data from the background data loaded in previously into the last entry in the background data vector
 bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground, bool isBG) {
 
@@ -93,7 +94,7 @@ bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground,
 		return retBackground;
 	};
 
-	if (packedBackground == NULL) return false; //Safety check (NULL pointer is same as false in this case)
+	if (packedBackground == NULL) return (char*)false; //Safety check (NULL pointer is same as false in this case)
 	if (bgNum == bgs.size()) { //If needed, resize
 		bgs.resize(2 * bgNum);
 		bgNameList.resize(2 * bgNum);
@@ -119,8 +120,8 @@ bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground,
 	}
 	return true; //Return adress (as size_t) of next background
 }
-
-size_t AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
+*/
+bool AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a size n tile array, interpret the bytes into an array and load into the atlas
 	char* nextTile = in; //Begin marker that will be used to indicate the next tile to be loaded
 	for (int whichTile = 0; whichTile < n; whichTile++) {
 		size_t* curSize = (size_t*)nextTile; //First 8 bytes of a tile are the name size
@@ -133,22 +134,22 @@ size_t AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a s
 	return (size_t)nextTile;
 }
 
+/*
 //Takes a file name in the path of the game, and loads the data into a char*
 char* AssetAtlas::loadFile(std::string fileName) {
-	/*std::string path = data_path(fileName);
-	std::ifstream assetFile(path, std::ios::binary);
-	assert(assetFile.isOpen());
+	std::string path = data_path(fileName);
+	//std::ifstream assetFile(path, std::ios::binary);
 
 	//File size code from https://stackoverflow.com/questions/10712117/how-to-count-the-characters-in-a-text-file
-	assetFile.seekg(0, std::ios_base::end);
 	size_t fileSize = (size_t)std::ios_base::streampos end_pos = assetFile.tellg();
 	char dataString[fileSize]; //Create string of size of file
 
 	assetFile.get(dataString, fileSize); //Load file contents into string
 	assetFile.close();
-	return dataString;*/
+	return dataString;
 	return NULL;
 }
+*/
 
 //Wrapper function that takes a file name and sets up the data to load a tile array
 size_t AssetAtlas::loadTiles(std::string fileName) {
@@ -163,19 +164,19 @@ bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground,
 		size_t* nTiles = (size_t*)packedBackground;
 		if (nTiles == NULL) return 0;
 		packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
-		packedBackground = (char*) loadTilesHelp(*nTiles, packedBackground);  //The return value is the start of the reference array
+		packedBackground = (char*)(loadTiles(*nTiles));  //The return value is the start of the reference array
 	}
 	if (!packedBackground) return 0; 
 	return loadBGRefs(nameSize, name, packedBackground, isBG);  //Load the reference array
 }
 
-bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  background*/
+bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  background
 	char* in = loadFile(fileName); //Get data from file
 	size_t* nameSize = (size_t*)in;
 	if (nameSize == NULL) return false;
 	char* name = (in + 8);
 	char* bgArray = (name + *nameSize);
-	return (loadBGHelp(*nameSize, name, bgArray,true)); //Load background given extracted variables
-}
 
+	return (loadBGHelp(*nameSize, name, bgArray, true)); //Load background given extracted variables
+}
 

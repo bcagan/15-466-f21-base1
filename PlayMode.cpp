@@ -68,6 +68,30 @@ PlayMode::PlayMode() {
 		}
 	}
 
+	//wall sprite:
+	ppu.tile_table[35].bit0 = {
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+		0b11111111,
+	};
+
+	// wall sprite:
+	ppu.tile_table[35].bit1 = {
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+		0b00000000,
+	};
+
 	//use sprite 32 as a "player":
 	ppu.tile_table[32].bit0 = {
 		0b01111110,
@@ -91,7 +115,7 @@ PlayMode::PlayMode() {
 	};
 
 	//use sprite 32 as a "player true":
-	ppu.tile_table[33].bit0 = {
+	ppu.tile_table[player_tile_index].bit0 = {
 		0b11111111,
 		0b11111111,
 		0b11111111,
@@ -101,7 +125,7 @@ PlayMode::PlayMode() {
 		0b11111111,
 		0b11111111,
 	};
-	ppu.tile_table[33].bit1 = {
+	ppu.tile_table[player_tile_index].bit1 = {
 		0b00000000,
 		0b01111110,
 		0b10111101,
@@ -249,6 +273,53 @@ void PlayMode::update(float elapsed) {
 		grounded = true;
 	}
 
+	// ---- collision ------
+	auto collides = [this] (int s1, int s2)
+	{
+		PPU466::Sprite t1 = ppu.sprites[s1];
+		PPU466::Sprite t2 = ppu.sprites[s2];
+		int tSize = 8; //tile size
+		
+		std::cout <<(int)t1.x << " " << (int)t2.x << std::endl;
+		std::cout << (int)t1.y << " " << (int)t2.y << std::endl;
+		//check whether t2 is inside collidable x range of t1
+		if ((t1.x >= t2.x && t1.x - t2.x < tSize + 1) ||
+			(t2.x >= t1.x && t2.x - t1.x < tSize))
+		{
+			//check y range
+			if ((t1.y >= t2.y && t1.y - t2.y < tSize + 1) ||
+				(t2.y >= t1.y && t2.y - t1.y < tSize))
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
+	PPU466::Sprite player_sprite = ppu.sprites[player_sprite_index];
+
+		PPU466::Sprite curr_sprite = ppu.sprites[2];
+		if (collides(player_sprite_index, 2))
+		{
+			if (curr_sprite.x + 1 >= player_sprite.x) // collidable object (CO) to the left
+			{
+				std::cout << "Collides to the left!" << std::endl;
+				player_at.x = curr_sprite.x - 8;
+			} else if (curr_sprite.x - 1 <= player_sprite.x + 7) // CO to the right
+			{
+				std::cout << "Collides to the right!" << std::endl;
+				player_at.x = curr_sprite.x + 1;
+			} if (curr_sprite.y + 1 >= player_sprite.y) // CO below
+			{
+				std::cout << "Collides below!" << std::endl;
+				player_at.y = curr_sprite.y - 1;
+			} if (curr_sprite.y - 1 <= player_sprite.y + 7) // CO above
+			{
+				std::cout << "Collides above!" << std::endl;
+				player_at.y = curr_sprite.y + 8;
+			}
+		}
+
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
@@ -258,7 +329,7 @@ void PlayMode::update(float elapsed) {
 
 
 	//if player collides with goal, win the game
-	if (collision_manager.Collides(player_tile_index, goal_tile_index))
+	if (collision_manager.Collides(player_sprite_index, goal_sprite_index))
 	{
 		level_complete();
 		next_state = WIN;
@@ -323,21 +394,26 @@ void PlayMode::draw_gameplay()
 	ppu.background_position.y = int32_t(-0.5f * player_at.y);
 
 	//player sprite:
-	ppu.sprites[0].x = int32_t(player_at.x);
-	ppu.sprites[0].y = int32_t(player_at.y);
-	ppu.sprites[0].index = player_tile_index;
-	ppu.sprites[0].attributes = 7;
+	ppu.sprites[player_sprite_index].x = int32_t(player_at.x);
+	ppu.sprites[player_sprite_index].y = int32_t(player_at.y);
+	ppu.sprites[player_sprite_index].index = player_tile_index;
+	ppu.sprites[player_sprite_index].attributes = 7;
 
 	//goal sprite
-	/*
-	 * ppu.sprites[1].x = int32_t(goal_at.x);
-	 * ppu.sprites[1].y = int32_t(goal_at.y);
-	 * ppu.sprites[1].index = <GOAL SPRITE TILE TABLE INDEX>;
-	 * ppu.sprites[1].attributes = <GOAL ATTRIBUTES>;
-	*/
 
+	ppu.sprites[1].x = int32_t(goal_at.x);
+	ppu.sprites[1].y = int32_t(goal_at.y);
+	ppu.sprites[1].index = goal_sprite_index;
+	ppu.sprites[1].attributes = 7;
+
+	//test wall
+	ppu.sprites[2].x = int32_t(PPU466::ScreenHeight / 2);
+	ppu.sprites[2].y = int32_t(1);
+	ppu.sprites[2].index = 35;
+	ppu.sprites[2].attributes = 7;
+	
 	//some other misc sprites:
-	for (uint32_t i = 2; i < 63; ++i) {
+	for (uint32_t i = 3; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
