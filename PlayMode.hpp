@@ -28,6 +28,11 @@ struct PlayMode : Mode {
 
 	//player position:
 	glm::vec2 player_at = glm::vec2(0.0f);
+	float gravity = -120.0f;
+	float max_jump_time = 0.4f;
+	float jump_speed = 60.0f;
+	bool jumping = false;
+	bool grounded = false;
 
 	//----- drawing handled by PPU466 -----
 
