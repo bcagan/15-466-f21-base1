@@ -161,7 +161,11 @@ public:
 			defaultLevel.tiles[ind] = defaultRef;
 		}
 		defaultLevelData.level = defaultLevel.tiles;
-
+		tiles[0] = defaultTileData;
+		tileNameList[0] = {
+			defaultTile.nameSize,
+			defaultTile.name
+		};
 	};
 	~AssetAtlas() {};
 

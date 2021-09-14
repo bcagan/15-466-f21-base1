@@ -42,7 +42,7 @@ struct PlayMode : Mode {
 	//----- game state -----
 	//player position:
 	int SPRITES_MAX = 64;
-	glm::vec2 player_at = glm::vec2(0.0f);
+	glm::vec2 player_at = glm::vec2(0, 232);
 	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>(SPRITES_MAX);
 	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>(SPRITES_MAX);
 	std::vector<std::string> lights_type = std::vector<std::string>(SPRITES_MAX); //Fill in with light type strings we want to use
@@ -53,7 +53,7 @@ struct PlayMode : Mode {
 	glm::vec2 player_velocity = glm::vec2(0.0f);
 	unsigned player_tile_index = 33;
 	unsigned player_sprite_index = 0;
-	glm::vec2 goal_at = glm::vec2(200, 200);
+	glm::vec2 goal_at = glm::vec2(248, 0);
 	unsigned goal_sprite_index = 34;
 
 	int health; //the player dies when health is less than zero

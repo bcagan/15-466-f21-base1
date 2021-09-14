@@ -22,9 +22,24 @@ PlayMode::PlayMode() {
 	//Create a new atlas, load all saved pngs into it.
 	importer.LoadTiles(atlas);
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
-\
+
+
+	// load from the PNG
+	std::array<TileRef, PPU466::BackgroundHeight *PPU466::BackgroundWidth> packedBackground = importer.GetPackedBackgroundFromPNG("Map.png");
+	for (int i = 0; i < 64; i++)
+	{
+		for (int j = 0; j < 60; j++)
+		{
+			unsigned index = 64 * i + j;
+			if (packedBackground[i].name == "wall")
+			{
+				ppu.background[index] = 0;
+			}
+		}
+	}
+
 	// step 1) read the tiles form the asset atlas
-	importer.LoadBackground(atlas);
+	// importer.LoadBackground(atlas);
 	
 	//importer.LoadLevel(atlas, "levels/dummy_level/png");
 
@@ -37,6 +52,7 @@ PlayMode::PlayMode() {
 
 	{
 		std::array<TileRef, PPU466::BackgroundHeight * PPU466::BackgroundWidth> level_tiles = importer.GetPackedBackgroundFromPNG("levels/dummy_level");
+				/*
 		for (int i = 0; i < 64; i ++)
 		{
 			for (int j = 0; j < 60; j++)
@@ -69,6 +85,7 @@ PlayMode::PlayMode() {
 				}
 			}
 		}
+				*/
 	}
 
 	//LevelRetType level = atlas.getLevel("Default");
@@ -580,11 +597,43 @@ void PlayMode::draw_gameplay()
 		for (int j = 0; j < 60; j++)
 		{
 			unsigned index = 64 * i + j;
-			curr_bg[index].bit0 = atlas.getBG("Default").tiles[index].bit0;
-			curr_bg[index].bit1 = atlas.getBG("Default").tiles[index].bit1;
+			//curr_bg[index].bit0 = atlas.getBG("Default").tiles[index].bit0;
+			//curr_bg[index].bit1 = atlas.getBG("Default").tiles[index].bit1;
+
+			ppu.background[index] = 0;
+			// set the background
+			/*
+			ppu.background[index] = (bg_pallete_index << 8) + index;
+			unsigned long bg_pallete_index = 3;
+
+			if (level_tiles[index].name == "player")
+			{
+				player_at.x = j;
+				player_at.y = i;
+			} else if (level_tiles[index].name == "light0")
+			{
+				lights_at.push_back(glm::vec2(j,i));
+			} else if (level_tiles[index].name == "light1")
+			{
+				lights_at.push_back(glm::vec2(j,i));
+			} else if (level_tiles[index].name == "light2")
+			{
+				lights_at.push_back(glm::vec2(j,i));
+
+			} else if (level_tiles[index].name == "wall")
+			{
+				walls_at.push_back(glm::vec2(j,i));
+			} else if (level_tiles[index].name == "goal")
+			{
+				goal_at.x = j;
+				goal_at.y = i;
+			} else if (level_tiles[index].name == "default")
+			{
+
+			}
+			*/
 		}
 	}
-	curr_bg = atlas.getBG("Default").tiles;
 
 	//background color will be some hsv-like fade:
 	//To be replaced with current background

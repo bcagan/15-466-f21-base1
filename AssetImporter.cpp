@@ -215,8 +215,8 @@ void AssetImporter::LoadTiles(AssetAtlas atlas)
 	read_chunk(ifsName, "name", &charSaved);
 
 	//Clear old tiles
-	atlas.tiles.clear();
-	atlas.tileNameList.clear();
+	//atlas.tiles.clear();
+	//atlas.tileNameList.clear();
 
 	for (int i = 0; i < tileSaved.size(); i++)
 	{
