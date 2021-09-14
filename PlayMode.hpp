@@ -34,6 +34,9 @@ struct PlayMode : Mode {
 	bool jumping = false;
 	bool grounded = false;
 
+	// walls
+	std::vector<glm::vec2> walls_at;
+
 	//----- drawing handled by PPU466 -----
 
 	PPU466 ppu;

@@ -153,11 +153,58 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
+	{ //handle player collisions with walls
+		for (auto w = walls_at.begin(); w < walls_at.end(); w++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the left of (*w)
+				player_at.x = (*w).x - 8;
+			} else if (player_at_floor_x - 8  + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the right
+				player_at.x = (*w).x + 8;
+			} else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides above
+				grounded = true;
+				player_at.y = (*w).y + 8;
+				player_velocity.y = 0;
+			} else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides below
+				player_at.y = (*w).y - 8;
+			}
+		}
+	}
+
 	constexpr float PlayerSpeed = 30.0f;
-	if (left.pressed) player_at.x -= PlayerSpeed * elapsed;
-	if (right.pressed) player_at.x += PlayerSpeed * elapsed;
-	if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
-	if (up.pressed) player_at.y += PlayerSpeed * elapsed;
+	player_velocity.x = 0;
+	if (left.pressed) player_velocity.x -= PlayerSpeed;
+	if (right.pressed) player_velocity.x += PlayerSpeed;
+
+	if (space.pressed && space.held < max_jump_time && grounded)
+	{
+		jumping = true;
+		space.held += elapsed;
+		if (space.held < max_jump_time)
+		{
+			player_velocity.y = jump_speed;
+		}
+	}
+	else
+	{
+		grounded = false;
+		if (space.held > 0.0f && jumping)
+		{
+			player_velocity.y = 0.0f;
+			jumping = false;
+		}
+		if (!space.pressed)
+		{
+			space.held = 0.0f;
+		}
+	}
+	player_velocity.y += gravity * elapsed;
+	player_at += player_velocity * elapsed;
 
 	//reset button press counters:
 	left.downs = 0;
