@@ -39,7 +39,6 @@ void AssetImporter::LoadPNGS()
 		glm::uvec2 size;
 		std::vector< glm::u8vec4 > data;
 
-		std::cout << "Loading file: " << img_path << std::endl;
 
 #if defined(_WIN32)
 		if (std::filesystem::exists(img_path))
@@ -166,7 +165,6 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 		{
 			int bit_index = j * 8 + i;
 			glm::u8vec4 pixel = data[bit_index];
-			std::cout << "Data at " << i << ", " << j << " is: " << (int) pixel.x << std::endl;
 			if (pixel.x > 0)
 			{
 				bit0 = bit0 | (1 << j);
@@ -188,11 +186,6 @@ void AssetImporter::writeToPPU(PPU466 *ppu, size_t startIndex)
 {
 	for (int i = 0; i < tilesToSave.size(); i++)
 	{
-		std::cout << "Writing to index " << (startIndex + i) << std::endl;
-		for (int j = 0; j < 8; j++)
-		{
-			std::cout << (int)tilesToSave[i].bit0[j] << std::endl;
-		}
 		ppu->tile_table[startIndex + i].bit0 = tilesToSave[i].bit0;
 		ppu->tile_table[startIndex + i].bit1 = tilesToSave[i].bit1;
 	}
