@@ -53,7 +53,7 @@ struct LevelAsset {
 	size_t nameSize; //name and size of the level
 	std::string name;
 	//Levels are stored as tiles, 64x60
-	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
 };
 
 struct LevelAssetData {
@@ -75,6 +75,9 @@ private:
 	TileRef defaultRef;
 	BGAsset defaultBG;
 	BGAssetData defaultBGData;
+	LevelAsset defaultLevel;
+	LevelAssetData defaultLevelData;
+
 
 	//Data strucutres are temporary for example, will be kept as vectors, resized as needed, linear searched.
 	
@@ -93,6 +96,7 @@ private:
 	char* loadFile(std::string fileName);
 
 	BGAssetData getBGHelp(std::string name); //Searches for an individual background
+	LevelAssetData getLevelHelp(std::string name); //Searches for an individual level
 
 	//New updated file formats
 	// 
@@ -156,7 +160,12 @@ public:
 		}
 		defaultBGData.background = defaultBG.background;
 
-		//Should we make a default level?
+		defaultLevel.name = "Default";
+		defaultLevel.nameSize = 7;
+		for (int ind = 0; ind < PPU466::BackgroundWidth * PPU466::BackgroundHeight; ind++) {
+			defaultLevel.tiles[ind] = defaultRef;
+		}
+		defaultLevelData.level = defaultLevel.tiles;
 
 	};
 	~AssetAtlas() {};
@@ -170,6 +179,7 @@ public:
 
 	size_t loadTiles(std::string fileName); //Loads an array of tiles
 	bool loadBG(std::string fileName);  //Loads an array of backgrounds
+	bool loadBG(char *packedBackground);  //Loads an array of backgrounds
 	bool loadLevel(std::string fileName); //Loads a level, which is encoded as a background
 
 };

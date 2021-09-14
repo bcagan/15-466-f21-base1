@@ -6,7 +6,7 @@
 #include <iostream>
 #include "read_write_chunk.hpp"
 #include <fstream>
-#include <PPU466.hpp>
+#include "PPU466.hpp"
 
 #if defined(__APPLE__)
 #include <unistd.h>
@@ -63,7 +63,7 @@ void AssetImporter::WritePngsToFile()
 		{
 			std::cout << "File is not readable!" << std::endl;
 		}
-		else if (r > 0) //file read successful
+		else if (r >= 0) //file read successful
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
 			writePngToSave(size, data, asset_name);
@@ -82,16 +82,16 @@ void AssetImporter::WritePngsToFile()
 	}
 }
 
-std::array<uint16_t, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetImporter::GetBackgroundFromPNG()
+std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetImporter::GetPackedBackgroundFromPNG(std::string bgName)
 {
-	std::string path = data_path(backgroundName + extension);
+	std::string path = data_path(bgName + extension);
 	glm::uvec2 size;
 	std::vector< glm::u8vec4 > data;
 
 	#if defined(_WIN32)
-		if (std::filesystem::exists(img_path))
+		if (std::filesystem::exists(path))
 		{
-			load_png(img_path, &size, &data, LowerLeftOrigin);
+			load_png(path, &size, &data, LowerLeftOrigin);
 		}
 		else
 		{
@@ -99,7 +99,7 @@ std::array<uint16_t, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetIm
 		}
 	#else
 		// code for access based on https://stackoverflow.com/questions/8580606/c-c-mac-os-x-check-if-file-exists
-		int r = access(img_path.c_str(), R_OK);
+		int r = access(path.c_str(), R_OK);
 		if (r == ENOENT)
 		{
 			std::cout << "File did not exist!" << std::endl;
@@ -108,26 +108,60 @@ std::array<uint16_t, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetIm
 		{
 			std::cout << "File is not readable!" << std::endl;
 		}
-		else if (r > 0) //file read successful
+		else if (r >= 0) //file read successful
 		{
-			load_png(img_path, &size, &data, LowerLeftOrigin);
+			load_png(path, &size, &data, LowerLeftOrigin);
 		}
 		else {
 			std::cout << "Error with file access" << std::endl;
 		}
 	#endif
 
+	std::cout << path << std::endl;
+	std::cout << size.x << " " << size.y << std::endl;
 	assert(size.x == 64 && size.y == 60);
 
+	std::array<TileRef, PPU466::BackgroundHeight * PPU466::BackgroundWidth> result;
 	for (size_t i = 0; i < 64; i++)
 	{
 		for (size_t j = 0; j < 60; j++)
 		{
 			size_t index = j * 64 + i;
-			uint8_t tileIndex = (uint8_t) data[index].x;
+			//uint8_t tileIndex = (uint8_t) data[index].x;
+			/*
+			switch (tileIndex)
+			{
+			case 0:
+				result[index].name = "player";
+				break;
+			case 1:
+				result[index].name = "light";
+				break;
+			case 2:
+				result[index].name = "goal";
+				break;
+			case 3:
+				result[index].name = "wall";
+				break;
+			case 4:
+				result[index].name = "platform";
+				break;
+			case 5:
+				result[index].name = "background-wall";
+			default:
+				result[index].name = "default";
+				break;
+			}
+			*/
+
+			result[index].name = "TestArrow";
+			result[index].nameSize = result[index].name.size();
 		}
 	}
+
+	return result;
 }
+
 
 //Cheap an easy way right now is to use the RBG data
 void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name)
@@ -208,6 +242,18 @@ void AssetImporter::LoadTiles(AssetAtlas atlas)
 		atlas.tiles.push_back(assetData);
 		atlas.tileNameList.push_back(assetName);
 	}
+}
+
+void AssetImporter::LoadBackground(AssetAtlas atlas)
+{
+	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> packedBackground = GetPackedBackgroundFromPNG(backgroundName);
+	atlas.loadBG(reinterpret_cast<char*>(&packedBackground));
+}
+
+void AssetImporter::LoadLevel(AssetAtlas atlas, std::string levelName)
+{
+	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> packedBackground = GetPackedBackgroundFromPNG(levelName);
+	atlas.loadBG(reinterpret_cast<char*>(&packedBackground));
 }
 
 AssetImporter::~AssetImporter()

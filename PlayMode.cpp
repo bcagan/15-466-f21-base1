@@ -26,16 +26,30 @@ PlayMode::PlayMode() {
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 \
 	// step 1) read the tiles form the asset atlas
+	importer.LoadBackground(atlas);
+	importer.LoadLevel(atlas, "levels/dummy_level/png");
 	/*
-	importer.writePngToSave("TestBackground");
-	atlas.loadBG("TestBackground");
 	importer.writePngToSave("TestLevel");
-	atlas.loadLevel("TestLevel");
 	*/
 	//Remove and instead individually load tiles AND load backgrounds
 
-	// step 2) load the current background and level
-	//TODO:
+	// step 2) populate the ppu tiles, sprite locations, and background
+	for (int i = 0; i < atlas.tiles.size(); i++)
+	{
+		ppu.tile_table[i].bit0 = atlas.tiles[i].bit0;
+		ppu.tile_table[i].bit1 = atlas.tiles[i].bit1;
+	}
+
+	LevelRetType level = atlas.getLevel("DefaultLevel");
+	curr_level = level.tiles;
+	for (int i = 0; i < curr_level.size(); i++)
+	{
+		// TileRef curr_tile = curr_level[i];
+
+		// if the curr tile is a light, add to lights_at
+
+		// if the curr tile is a wall, add to walls_at
+	}
 	
 
 	// you *must* use an asset pipeline of some sort to generate tiles.

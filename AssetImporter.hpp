@@ -22,12 +22,15 @@ public:
 	~AssetImporter();
 
 	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name);
+	std::array<glm::u8vec4, PPU466::BackgroundWidth * PPU466::BackgroundHeight> GetBackgroundFromPNG();
 
 	void WritePngsToFile();
 
 	void LoadTiles(AssetAtlas atlas);
 
-	std::array<uint16_t, PPU466::BackgroundWidth * PPU466::BackgroundHeight> GetBackgroundFromPNG();
+	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> GetPackedBackgroundFromPNG(std::string bgName);
+	void LoadBackground(AssetAtlas atlas);
+	void LoadLevel(AssetAtlas atlas, std::string levelName);
 
 	std::vector<tileSaveData> tilesToSave;
 	std::vector<char> namesToSave;
@@ -35,10 +38,14 @@ public:
 	//AssetAtlas atlas;
 
 private:
+	#if defined(_WIN32)
 	std::string subPath = "\\tiles\\";
+	#else
+	std::string subPath = "/tiles/";
+	#endif
 	std::string extension = ".png";
 
-	std::string backgroundName = "background.png";
+	std::string backgroundName = "backgrounds/bg";
 
 	std::vector<std::string> files{ 
 		"TestArrow"
@@ -47,7 +54,5 @@ private:
 	std::vector<std::string> names{
 		"Arrow"
 	};
-
-	
 
 };
