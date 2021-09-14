@@ -17,6 +17,9 @@ struct PlayMode : Mode {
 
 	//----- game state -----
 
+	//When player dies
+	void resetPlayer();
+
 	//input tracking:
 	struct Button {
 		uint8_t downs = 0;
@@ -27,7 +30,8 @@ struct PlayMode : Mode {
 	float background_fade = 0.0f;
 
 	//player position:
-	glm::vec2 player_at = glm::vec2(0.0f);
+	glm::vec2 initPos = glm::vec2(0.0f);
+	glm::vec2 player_at;
 
 	//----- drawing handled by PPU466 -----
 
