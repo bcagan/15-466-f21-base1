@@ -38,10 +38,11 @@ struct PlayMode : Mode {
 	float jump_speed = 60.0f;
 	bool jumping = false;
 	bool grounded = false;
-
-	// walls
-	std::vector<glm::vec2> walls_at;
 	glm::vec2 initPos = glm::vec2(0.0f);
+
+	// walls and spikes
+	std::vector<glm::vec2> walls_at;
+	std::vector<glm::vec2> spikes_at;
 
 	//----- drawing handled by PPU466 -----
 

@@ -5,14 +5,6 @@
 #include <glm/glm.hpp>
 #include "PPU466.hpp"
 
-struct tileSaveData
-{
-	int64_t bit0;
-	int64_t bit1;
-	size_t nameStart;
-	size_t nameEnd;
-};
-
 class AssetImporter {
 
 public:
@@ -21,20 +13,19 @@ public:
 	AssetImporter();
 	~AssetImporter();
 
-	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name);
+	void writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data);
 	std::array<glm::u8vec4, PPU466::BackgroundWidth * PPU466::BackgroundHeight> GetBackgroundFromPNG();
 
-	void WritePngsToFile();
+	void LoadPNGS();
 
 	void LoadTiles(AssetAtlas atlas);
 
 	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> GetPackedBackgroundFromPNG(std::string bgName);
 	void LoadBackground(AssetAtlas atlas);
 	void LoadLevel(AssetAtlas atlas, std::string levelName);
+	void writeToPPU(PPU466 *ppu, size_t startIndex);
 
-	std::vector<tileSaveData> tilesToSave;
-	std::vector<char> namesToSave;
-
+	std::vector<PPU466::Tile> tilesToSave;
 	//AssetAtlas atlas;
 
 private:
@@ -48,13 +39,7 @@ private:
 	std::string backgroundName = "backgrounds/bg";
 
 	std::vector<std::string> files{ 
-		"TestArrow",
-		"Default"
-	};
-
-	std::vector<std::string> names{
-		"Arrow",
-		"Default"
+		"TestArrow"
 	};
 
 };
