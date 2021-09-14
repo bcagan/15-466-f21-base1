@@ -192,7 +192,7 @@ void PlayMode::update(float elapsed) {
 			}
 		}
 		//Handle collision detection for spikes
-		for (auto s = spikes_at.begin(); w < spikes_at.end(); w++)
+		for (auto s = spikes_at.begin(); s < spikes_at.end(); s++)
 		{
 			unsigned player_at_floor_x = (int)floor(player_at.x);
 			unsigned player_at_floor_y = (int)floor(player_at.y);
