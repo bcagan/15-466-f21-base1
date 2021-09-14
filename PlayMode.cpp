@@ -9,14 +9,8 @@
 #include <random>
 
 PlayMode::PlayMode() {
-	//TODO:
-	// you *must* use an asset pipeline of some sort to generate tiles.
-	// don't hardcode them like this!
-	// or, at least, if you do hardcode them like this,
-	//  make yourself a script that spits out the code that you paste in here
-	//   and check that script into your repository.
 
-	//Also, *don't* use these tiles in your game:
+	player_at = initPos;
 
 	{ //walls
 		walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1));
@@ -109,6 +103,10 @@ PlayMode::PlayMode() {
 }
 
 PlayMode::~PlayMode() {
+}
+
+void PlayMode::resetPlayer() {
+	player_at = initPos;
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
