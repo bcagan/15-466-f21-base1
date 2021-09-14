@@ -18,11 +18,8 @@ PlayMode::PlayMode() {
 
 	//Also, *don't* use these tiles in your game:
 
-	{//walls
-		for (int i = 0; i < 256/8; i++)
-		{
-			walls_at.push_back(glm::vec2(i, 0));
-		}
+	{ //walls
+		walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1));
 	}
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
@@ -221,14 +218,18 @@ void PlayMode::update(float elapsed) {
 			space.held = 0.0f;
 		}
 	}
+
 	player_velocity.y += gravity * elapsed;
 	player_at += player_velocity * elapsed;
 
-	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
+	//Bounds check!
+	if (player_at.y <= 0)
+	{
+		player_at.y = 0;
+		player_velocity.y = 0;
+		grounded = true;
+	}
+	
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
@@ -262,8 +263,18 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.sprites[0].index = 32;
 	ppu.sprites[0].attributes = 7;
 
+	unsigned k = 1;
+	for (; k < walls_at.size(); k++)
+	{
+		std::cout << ppu.sprites[k].x << std::endl;
+		ppu.sprites[k].x = int32_t(walls_at[k].x);
+		ppu.sprites[k].y = int32_t(walls_at[k].y);
+		ppu.sprites[k].index = 32;
+		ppu.sprites[k].attributes = 7;
+	}
+
 	//some other misc sprites:
-	for (uint32_t i = 1; i < 63; ++i) {
+	for (uint32_t i = k; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
