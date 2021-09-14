@@ -18,6 +18,13 @@ PlayMode::PlayMode() {
 
 	//Also, *don't* use these tiles in your game:
 
+	{//walls
+		for (int i = 0; i < 256/8; i++)
+		{
+			walls_at.push_back(glm::vec2(i, 0));
+		}
+	}
+
 	{ //use tiles 0-16 as some weird dot pattern thing:
 		std::array< uint8_t, 8*8 > distance;
 		for (uint32_t y = 0; y < 8; ++y) {
@@ -127,6 +134,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = true;
 			return true;
 		}
+		else if (evt.key.keysym.sym == SDLK_SPACE) {
+			space.downs += 1;
+			space.pressed = true;
+			return true;
+		}
 	} else if (evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.sym == SDLK_LEFT) {
 			left.pressed = false;
@@ -137,8 +149,14 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.sym == SDLK_UP) {
 			up.pressed = false;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
+		}
+		else if (evt.key.keysym.sym == SDLK_DOWN) {
 			down.pressed = false;
+			return true;
+		}
+		else if (evt.key.keysym.sym == SDLK_SPACE)
+		{
+			space.pressed = false;
 			return true;
 		}
 	}
@@ -223,6 +241,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
 		0xff
 	);
+	
 
 	//tilemap gets recomputed every frame as some weird plasma thing:
 	//NOTE: don't do this in your game! actually make a map or something :-)
