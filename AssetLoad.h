@@ -25,7 +25,7 @@ struct AssetName {
 struct TileRef {
 	size_t nameSize; //Name of tile being referenced, and its size
 	std::string name;
-	std::array< glm::u8vec4, 4> pallet; //Pallets being used for given tile
+	uint8_t pallet; //Pallets being used for given tile
 };
 
 struct BGAsset {
@@ -46,14 +46,14 @@ struct BGAssetData {
 
 struct BGRetType {
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
-	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
+	std::array< uint8_t, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
 };
 
 struct LevelAsset {
 	size_t nameSize; //name and size of the level
 	std::string name;
 	//Levels are stored as tiles, 64x60
-	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
 };
 
 struct LevelAssetData {
@@ -63,7 +63,7 @@ struct LevelAssetData {
 
 struct LevelRetType {
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
-	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
+	std::array< uint8_t, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
 };
 
 class AssetAtlas
@@ -75,6 +75,9 @@ private:
 	TileRef defaultRef;
 	BGAsset defaultBG;
 	BGAssetData defaultBGData;
+	LevelAsset defaultLevel;
+	LevelAssetData defaultLevelData;
+
 
 	//Data strucutres are temporary for example, will be kept as vectors, resized as needed, linear searched.
 	
@@ -93,6 +96,7 @@ private:
 	char* loadFile(std::string fileName);
 
 	BGAssetData getBGHelp(std::string name); //Searches for an individual background
+	LevelAssetData getLevelHelp(std::string name); //Searches for an individual level
 
 	//New updated file formats
 	// 
@@ -141,12 +145,7 @@ public:
 
 		defaultRef.nameSize = 7;
 		defaultRef.name = "Default";
-		defaultRef.pallet = {
-			glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
-			glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
-			glm::u8vec4(0x00, 0x00, 0xFF, 0xFF),
-			glm::u8vec4(0x00, 0x00, 0x00, 0xFF),
-		};
+		defaultRef.pallet = 0;
 
 
 		defaultBG.name = "Default";
@@ -156,8 +155,17 @@ public:
 		}
 		defaultBGData.background = defaultBG.background;
 
-		//Should we make a default level?
-
+		defaultLevel.name = "Default";
+		defaultLevel.nameSize = 7;
+		for (int ind = 0; ind < PPU466::BackgroundWidth * PPU466::BackgroundHeight; ind++) {
+			defaultLevel.tiles[ind] = defaultRef;
+		}
+		defaultLevelData.level = defaultLevel.tiles;
+		tiles[0] = defaultTileData;
+		tileNameList[0] = {
+			defaultTile.nameSize,
+			defaultTile.name
+		};
 	};
 	~AssetAtlas() {};
 
@@ -170,6 +178,7 @@ public:
 
 	size_t loadTiles(std::string fileName); //Loads an array of tiles
 	bool loadBG(std::string fileName);  //Loads an array of backgrounds
+	bool loadBG(char *packedBackground);  //Loads an array of backgrounds
 	bool loadLevel(std::string fileName); //Loads a level, which is encoded as a background
 
 };

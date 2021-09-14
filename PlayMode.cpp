@@ -1,58 +1,47 @@
 #include "PlayMode.hpp"
-#include "AssetImporter.hpp"
 
 //for the GL_ERRORS() macro:
 #include "gl_errors.hpp"
+
+#include "AssetImporter.hpp"
 
 //for glm::value_ptr() :
 #include <glm/gtc/type_ptr.hpp>
 
 #include <random>
 
-#define ERROR_FLOAT 0.000005f
-
 PlayMode::PlayMode() {
 
-	//Load in new files, and clean out the old script!
 	AssetImporter importer;
 
-	//Regenerate all of our files!
-	importer.WritePngsToFile();
-
-	//Create a new atlas, load all saved pngs into it.
-	importer.LoadTiles(atlas);
-
-	//atlas = AssetAtlas();
-	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
-\
-	// step 1) read the tiles form the asset atlas
-	/*
-	importer.writePngToSave("TestBackground");
-	atlas.loadBG("TestBackground");
-	importer.writePngToSave("TestLevel");
-	atlas.loadLevel("TestLevel");
-	*/
-	//Remove and instead individually load tiles AND load backgrounds
-
-	// step 2) load the current background and level
-	//TODO:
-	
-
-	// you *must* use an asset pipeline of some sort to generate tiles.
-	// don't hardcode them like this!
-	// or, at least, if you do hardcode them like this,
-	//  make yourself a script that spits out the code that you paste in here
-	//   and check that script into your repository.
+	importer.LoadPNGS();
 
 	//Also, *don't* use these tiles in your game:
+	player_at = initPos;
+
+	{ //walls
+		for (int i = 0; i < 30; i++)
+		{
+			float x = (i * 17.f);
+			if (int(x) % 2 == 0) x = -x;
+			float y = (float)240 * (float)i / 30;
+			walls_at.push_back(glm::vec2(uint8_t(x) % 256, uint8_t(y) % 240));
+		}
+	}
+
+	{//Spikes
+		spikes_at.push_back(glm::vec2(4 * 8, 16));
+	}
+
+	importer.loadLevel("level1", &walls_at, &spikes_at);
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
-		std::array< uint8_t, 8*8 > distance;
+		std::array< uint8_t, 8 * 8 > distance;
 		for (uint32_t y = 0; y < 8; ++y) {
 			for (uint32_t x = 0; x < 8; ++x) {
 				float d = glm::length(glm::vec2((x + 0.5f) - 4.0f, (y + 0.5f) - 4.0f));
 				d /= glm::length(glm::vec2(4.0f, 4.0f));
-				distance[x+8*y] = std::max(0,std::min(255,int32_t( 255.0f * d )));
+				distance[x + 8 * y] = std::max(0, std::min(255, int32_t(255.0f * d)));
 			}
 		}
 		for (uint32_t index = 0; index < 16; ++index) {
@@ -62,10 +51,11 @@ PlayMode::PlayMode() {
 				uint8_t bit0 = 0;
 				uint8_t bit1 = 0;
 				for (uint32_t x = 0; x < 8; ++x) {
-					uint8_t d = distance[x+8*y];
+					uint8_t d = distance[x + 8 * y];
 					if (d > t) {
 						bit0 |= (1 << x);
-					} else {
+					}
+					else {
 						bit1 |= (1 << x);
 					}
 				}
@@ -75,53 +65,6 @@ PlayMode::PlayMode() {
 			ppu.tile_table[index] = tile;
 		}
 	}
-
-	//wall sprite:
-	ppu.tile_table[default_wall_tile].bit0 = {
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-	};
-
-	// wall sprite:
-	ppu.tile_table[default_wall_tile].bit1 = {
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-		0b00000000,
-	};
-	//light sprite:
-	ppu.tile_table[default_wall_tile].bit0 = {
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-	};
-
-	// light sprite:
-	ppu.tile_table[default_wall_tile].bit1 = {
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-	};
 
 	//use sprite 32 as a "player":
 	ppu.tile_table[32].bit0 = {
@@ -137,34 +80,12 @@ PlayMode::PlayMode() {
 	ppu.tile_table[32].bit1 = {
 		0b00000000,
 		0b00000000,
-		0b00100100,
 		0b00011000,
-		0b00000000,
-		0b01000010,
 		0b00100100,
-		0b01000010,
-	};
-
-	//use sprite 32 as a "player true":
-	ppu.tile_table[player_tile_index].bit0 = {
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-	};
-	ppu.tile_table[player_tile_index].bit1 = {
 		0b00000000,
-		0b01111110,
-		0b10111101,
-		0b10111101,
-		0b11011011,
-		0b11011011,
-		0b11100111,
-		0b11100111,
+		0b00100100,
+		0b00000000,
+		0b00000000,
 	};
 
 	//makes the outside of tiles 0-16 solid:
@@ -183,40 +104,59 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 	};
 
-	//testing lighting
+	//Spike pallete
 	ppu.palette_table[2] = {
-		glm::u8vec4(0x00, 0x00, 0xff, 0xff),
-		glm::u8vec4(0x00, 0x00, 0xff, 0xff),
-		glm::u8vec4(0x00, 0x00, 0xff, 0xff),
-		glm::u8vec4(0x00, 0x00, 0xff, 0xff), };
+		glm::u8vec4(0xff, 0x00, 0x00, 0x8f),
+		glm::u8vec4(0x98,0x96,0x98,0xff),
+		glm::u8vec4(0x3c,0x3c,0x3c,0xff),
+		glm::u8vec4(0xec,0xee,0xec,0xff),
+	};
+
+	//Wall
+	ppu.palette_table[3] = {
+		glm::u8vec4(0x98,0x4b,0x00,0xff),
+		glm::u8vec4(0x25,0x25,0x25,0xff),
+		glm::u8vec4(0xec,0xee,0xec,0xff),
+		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	};
 
 	//used for the player:
 	ppu.palette_table[7] = {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0x00, 0xff, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-	};
-
-	//wall:
-	ppu.palette_table[default_wall_pallete] = {
-		glm::u8vec4(0xff, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0xff, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0xff, 0x00),
-		glm::u8vec4(0xff, 0xff, 0x00, 0x00),
+		glm::u8vec4(0x98, 0x4b, 0x00, 0xff),
+		glm::u8vec4(0xe0, 0xac, 0x69, 0xff),
+		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 	};
 
 	//used for the misc other sprites:
 	ppu.palette_table[6] = {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0x00, 0x00, 0xff),
+		glm::u8vec4(0x88, 0x88, 0xff, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 	};
 
+	for (int i = 0; i < 8; i++)
+	{
+		std::cout << (int)ppu.tile_table[32].bit0[i] << std::endl;
+	}
+
+	importer.writeToPPU(&ppu, 0);
+
+	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
+		for (uint32_t x = 0; x < PPU466::BackgroundWidth; ++x) {
+			//TODO: make weird plasma thing
+			ppu.background[x + PPU466::BackgroundWidth * y] = ((x + y) % 2);
+		}
+	}
 }
 
 PlayMode::~PlayMode() {
+}
+
+void PlayMode::resetPlayer() {
+	player_at = initPos;
+	grounded = true;
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -284,17 +224,31 @@ void PlayMode::update(float elapsed) {
 			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
 			{ //collides to the left of (*w)
 				player_at.x = (*w).x - 8;
-			} else if (player_at_floor_x - 8  + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			}
+			else if (player_at_floor_x - 8 + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
 			{ //collides to the right
 				player_at.x = (*w).x + 8;
-			} else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			}
+			else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
 			{ //collides above
 				grounded = true;
 				player_at.y = (*w).y + 8;
 				player_velocity.y = 0;
-			} else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			}
+			else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
 			{ //collides below
 				player_at.y = (*w).y - 8;
+			}
+		}
+		//Handle collision detection for spikes
+		for (auto s = spikes_at.begin(); s < spikes_at.end(); s++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			if (player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
+			{ //collides above
+				resetPlayer();
+				player_velocity.y = 0;
 			}
 		}
 	}
@@ -328,10 +282,6 @@ void PlayMode::update(float elapsed) {
 	}
 
 	player_velocity.y += gravity * elapsed;
-
-	//if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
-	//if (up.pressed) player_at.y += PlayerSpeed * elapsed;
-
 	player_at += player_velocity * elapsed;
 
 	//Bounds check!
@@ -342,267 +292,56 @@ void PlayMode::update(float elapsed) {
 		grounded = true;
 	}
 	
-	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
-	space.downs = 0;
-
-	//if player collides with goal, win the game
-	if (false) // TODO: replace with goal collision
-	{
-		level_complete();
-		next_state = WIN;
-	}
-	
-	//TODO: if player collides with a light, subtract health
-	//TODO: if the player is in shadow, add health
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
-	
-	switch(curr_state)
-	{
-		case GAMEPLAY:
-			draw_gameplay();
-			break;
-		case WIN:
-			draw_win();
-			break;
-		case DEAD:
-			draw_dead();
-			break;
-	}
-	//--- actually draw ---
-	ppu.draw(drawable_size);
-}
-
-//Lighting
-
-//End goal is to use the following but may not have time to test. For now will use more basic but still viable method (testing center only)
-
-//Checks if object is with in outer or inner range of spotlight, and gives lighting value accordingly
-/*uint8_t PlayMode::whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta) {
-	if (objPos.y + 4.f > lightPos.y) return 0;
-	assert(innerTheta != 0.0f && innerTheta != 90.0f && outerTheta != 0.0f && outerTheta != 90.0f);
-
-	//Derived from https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
-
-	auto getVal = [this](glm::vec2 lightPos, glm::vec2 objPos, float theta){
-		
-		float minX = objPos.x + 4.f;
-		float maxX = objPos.x - 4.f;
-		if (abs(lightPos.x - (objPos.x - 4.f)) < abs(lightPos.x - (objPos.x + 4.f))) {
-			minX = objPos.x - 4.f; maxX = objPos.x + 4.f;
-		}
-		glm::vec2 b0 = glm::vec2(minX, objPos.y + 4.f); //close
-		glm::vec2 b1 = glm::vec2(maxX, objPos.y - 4.f); //far	
-
-
-		bool doesLeft = true;
-		bool doesRight = true;
-		float tx = (b0.x - lightPos.x) / -cos(theta);//? is this dX?
-		float ty = (b0.y - lightPos.y) / -sin(theta);
-		float tMinInLeft = (tx > ty) ? tx : ty;
-		float t1x = (b1.x - lightPos.x) / -cos(theta);//? is this dX?
-		float t1y = (b1.y - lightPos.y) / -sin(theta);
-		float tMaxInLeft = (tx < ty) ? tx : ty;
-		//intersection check
-		if (tx > t1y || ty > t1x) doesLeft = false;
-
-		tx = (b0.x - lightPos.x) / cos(theta);//? is this dX?
-		ty = (b0.y - lightPos.y) / -sin(theta);
-		float tMinInRight = (tx > ty) ? tx : ty;
-		t1x = (b1.x - lightPos.x) / cos(theta);//? is this dX?
-		t1y = (b1.y - lightPos.y) / -sin(theta);
-		float tMaxInRight = (tx < ty) ? tx : ty;
-		//intersection check
-		if (tx > t1y || ty > t1x) doesRight = false;
-		//Inner val
-		float retVal = 0.0f;
-		if (doesLeft && doesRight) { //If both left and right intersect box
-			glm::vec2 minIntLeft = glm::vec2(-tMinInLeft * cos(innerTheta) + lightPos.x,
-			-tMinInLeft * sin(innerTheta) + lightPos.y);
-			glm::vec2 maxIntLeft = glm::vec2(-tMaxInLeft * cos(innerTheta) + lightPos.x,
-			-tMaxInLeft * sin(innerTheta) + lightPos.y);
-			glm::vec2 minIntRight = glm::vec2(tMinInRight * cos(innerTheta) + lightPos.x,
-			-tMinInRight * sin(innerTheta) + lightPos.y);
-			glm::vec2 maxIntRight = glm::vec2(tMaxInRight * cos(innerTheta) + lightPos.x,
-			-tMaxInRight * sin(innerTheta) + lightPos.y);
-
-			//Due to location of light,we know min hits are on top, and max are on sides
-			retVal = 64.f;
-			retVal -= (minIntLeft.x - objPos.x + 4.f) * (maxIntLeft.y - objPos.y + 4.f) / 2;
-			retVal -= (objPos.x + 4.f - minIntRight.x) * (objPos.y + 4.f - maxIntRight.y) / 2;
-			retVal /= 64.f;
-
-		}
-		else if (doesLeft) { //If only left does
-			if(minIntLeft.y >= objPos.x + 4.f - ERROR_FLOAT){
-				retVal = 64.f;
-				retVal -= (minIntLeft.x - objPos.x + 4.f) * (maxIntLeft.y - objPos.y + 4.f) / 2;
-				retVal /= 64.f;
-			}
-			else{
-				retVal = 64.f;
-				retVal -= (manIntLeft.x - objPos.x + 4.f) * (minIntLeft.y - objPos.y + 4.f) / 2;
-				retVal/= 64.fl
-			}
-		}
-		else if (doesRight) { //If only right does, consider left the left side of box
-			if(minIntRight.y >= objPos.x + 4.f - ERROR_FLOAT){
-				retVal = 64.f;
-				retVal -= (objPos.x + 4.f - minIntRight.x) * (objPos.y + 4.f - maxIntRight.y) / 2;
-				retVal /= 64.f;
-			}
-			else{
-				retVal = 64.f;
-				retVal -= (objPos.x + 4.f - maxIntRight.x) * (objPos.y + 4.f - minIntRight.y) / 2;
-				retVal/= 64.f;
-			}
-		}
-		return retVal;
-	};
-
-	float innerVal = 2.0f*getVal(lightPos, objPos, innerTheta);
-	float outerVal = getVal(lightPos, objPos, outerTheta) - innerVal/2;
-	return (uint8_t) roundf(innerVal + outerVal);
-}*/
-
-//More basic version of above for testing/if cant test ^^^ in time
-uint8_t PlayMode::whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta) {
-	//If above, don't render as lit
-	if (objPos.y >= lightPos.y) return 0;
-	//First check inner occlusion
-	float xRange = (lightPos.y - objPos.y) / tan(innerTheta);
-	if (fabs(lightPos.x - objPos.x) <= xRange) return 2;
-	//Then check outer occlusion
-	xRange = (lightPos.y - objPos.y) / tan(outerTheta);
-	if (fabs(lightPos.x - objPos.x) <= xRange) return 1;
-	return 0;
-}
-
-void PlayMode::updatePallet() {
-	for (size_t x = 0; x < PPU466::BackgroundWidth; x++) {
-		for (size_t y = 0; y < PPU466::BackgroundHeight; y++) {
-			glm::vec2 objPos = glm::vec2((float)(x * 8 + 4), (float)(y * 8 + 4));
-			uint8_t lightVal = 0;
-			for (size_t lightInd = 0; lightInd < lights_at.size(); lightInd++) {
-				uint8_t tempVal = whichLight(lights_at[lightInd], objPos, (LightTypeInd.getObj(lights_type[lightInd])).inner, 
-					(LightTypeInd.getObj(lights_type[lightInd])).outer);
-				if (tempVal > lightVal) lightVal = tempVal;
-			}
-			size_t ind = y * PPU466::BackgroundWidth + x;
-			curr_bg[ind].pallet = backgroundColors[lightVal][ind]; 
-		}
-	}
-}
-
-
-//x,y, in [256,240]
-uint8_t PlayMode::updateLightLevel(size_t objInd) {
-	uint8_t lightVal = 0;
-	for (size_t lightInd = 0; lightInd < lights_at.size(); lightInd++) {
-		uint8_t tempVal = whichLight(glm::vec2((float)((lights_at[lightInd]).x + 4.f), (float)((lights_at[lightInd]).y + 4.f)),
-			glm::vec2((float)((walls_at[objInd]).x + 4.f),(float)((walls_at[objInd]).y + 4.f)),
-			(LightTypeInd.getObj( /*lights_type[lightInd]*/"light1")).inner, (LightTypeInd.getObj(/*lights_type[whichLight]*/"light1")).outer);
-		if (tempVal > lightVal) lightVal = tempVal;
-	}
-	std::array<uint8_t, 3> wallPalletes;
-	wallPalletes[0] = 0;//dark
-	wallPalletes[1] = 1;//partially lit
-	wallPalletes[2] = 2;//lit
-	return wallPalletes[lightVal];
-}
-
-
-void PlayMode::level_complete()
-{
-	std::cout << "The level has been completed!" << std::endl;
-}
-
-void PlayMode::player_died()
-{
-	std::cout << "The player has died! :(" << std::endl;
-}
-
-void PlayMode::draw_gameplay()
-{
 	//--- set ppu state based on game state ---
-	//curr_bg = atlas.getBG("Default").tiles;
 
 	//background color will be some hsv-like fade:
-	//To be replaced with current background
 	ppu.background_color = glm::u8vec4(
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 0.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 1.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
+		0x44,
+		0x44,
+		0xff,
 		0xff
 	);
 
-	//tilemap gets recomputed every frame as some weird plasma thing:
-	//NOTE: don't do this in your game! actually make a map or something :-)
-	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
-		for (uint32_t x = 0; x < PPU466::BackgroundWidth; ++x) {
-			//TODO: make weird plasma thing
-			ppu.background[x+PPU466::BackgroundWidth*y] = ((x+y)%16);
-		}
-	}
-
 	//background scroll:
-	ppu.background_position.x = int32_t(-0.5f * player_at.x);
-	ppu.background_position.y = int32_t(-0.5f * player_at.y);
+	ppu.background_position.x = int32_t(.6f * player_at.x);
+	ppu.background_position.y = 0;// int32_t(player_at.y);
 
 	//player sprite:
-	ppu.sprites[player_sprite_index].x = int32_t(player_at.x);
-	ppu.sprites[player_sprite_index].y = int32_t(player_at.y);
-	ppu.sprites[player_sprite_index].index = player_tile_index;
-	ppu.sprites[player_sprite_index].attributes = 7;
+	ppu.sprites[0].x = int32_t(player_at.x);
+	ppu.sprites[0].y = int32_t(player_at.y);
+	ppu.sprites[0].index = 4;
+	ppu.sprites[0].attributes = 7;
 
-	//goal sprite
-	ppu.sprites[1].x = int32_t(goal_at.x);
-	ppu.sprites[1].y = int32_t(goal_at.y);
-	ppu.sprites[1].index = goal_sprite_index;
-	ppu.sprites[1].attributes = 7; 
-
-	//platforms and walls
-	int i;
-	for (i = 2; i < walls_at.size() + 2; i++)
+	size_t offset1 = 1;
+	for (size_t k = 0; k < walls_at.size(); k++)
 	{
-		(ppu.sprites[i]).x = (uint8_t)(walls_at[i - 2]).x;
-		(ppu.sprites[i]).y = (uint8_t)(walls_at[i - 2]).y;
-		ppu.sprites[i].index = default_wall_tile;
-		ppu.sprites[i].attributes = updateLightLevel(i-2);
+		ppu.sprites[k + offset1].x = int32_t(walls_at[k].x);
+		ppu.sprites[k + offset1].y = int32_t(walls_at[k].y);
+		ppu.sprites[k + offset1].index = 3;
+		ppu.sprites[k + offset1].attributes = 3;
 	}
 
-	//lights
-	for (int j = i; j < i + lights_at.size(); j++)
-	{
-		ppu.sprites[j].x = (uint8_t)lights_at[j - i].x;
-		ppu.sprites[j].y = (uint8_t)walls_at[j - i].y;
-		ppu.sprites[j].index = default_light_tile;
-		ppu.sprites[j].attributes = default_wall_pallete; 
-	}
-	
+	size_t offset2 = offset1 + walls_at.size();
 	//some other misc sprites:
-	for (uint32_t i = 3; i < 63; ++i) {
+	/*for (size_t i = offset2; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].index = 32;
 		ppu.sprites[i].attributes = 6;
 		if (i % 2) ppu.sprites[i].attributes |= 0x80; //'behind' bit
+	}*/
+	size_t offset3 = offset2;
+	assert(spikes_at.size() > 0);
+	for (size_t s = 0; s < spikes_at.size(); s++) {
+		ppu.sprites[s + offset3].x = int32_t(spikes_at[s].x);
+		ppu.sprites[s + offset3].y = int32_t(spikes_at[s].y);
+		ppu.sprites[s + offset3].index = 2;
+		ppu.sprites[s + offset3].attributes = 2;
 	}
-
-}
-
-void PlayMode::draw_win()
-{
-
-}
-
-void PlayMode::draw_dead()
-{
-
+	//--- actually draw ---
+	ppu.draw(drawable_size);
 }

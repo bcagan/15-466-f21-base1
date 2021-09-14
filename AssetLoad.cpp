@@ -44,6 +44,32 @@ BGRetType AssetAtlas::getBG(std::string name) {
 	return retBG;
 }
 
+//Trys to find (linear search) a level with the name given by the user. If it doesn't exist, gives default tile
+//Gives background in refs, needs to still be converted to final level data type
+LevelAssetData AssetAtlas::getLevelHelp(std::string name) {
+	for (size_t index = 0; index < bgNum; index++) {
+		AssetName currLevel = levelNameList[index];
+		if (currLevel.name.compare(name) == 0) return levels[index];
+	}
+	std::cout << "error: could not find level ''" << name << "'' in atlas.\n Using default level.\n";
+	return defaultLevelData;
+}
+
+//Takes a user's inputted name and tries to find a level using getBHHelp matching it. If it can't find it, uses default level
+//Coverts refs into proper level tiles with the pallets from the refs.
+LevelRetType AssetAtlas::getLevel(std::string name) {
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > thisBG = (getBGHelp(name)).background; //Get reference array
+	LevelRetType retLevel;
+	for (size_t ind = 0; ind < PPU466::BackgroundHeight * PPU466::BackgroundWidth; ind++) {
+		TileRef thisTile = thisBG[ind]; //Get tile from each reference and put into the return aray
+		TileAssetData thisTileData = getTile(thisTile.name);
+		retLevel.tiles[ind].bit0 = thisTileData.bit0;
+		retLevel.tiles[ind].bit1 = thisTileData.bit1;
+		retLevel.pallets[ind] = thisTile.pallet;
+	}
+	return retLevel;
+}
+
 //Need a level search function
 
 //Loads the given tile data, name, and name size, into a new entry at the end of the tile vector
@@ -144,6 +170,9 @@ bool AssetAtlas::loadTilesHelp(size_t n, char* in) { //Given the adress of a siz
 char* AssetAtlas::loadFile(std::string fileName) {
 	std::string path = data_path(fileName);
 	std::ifstream assetFile = std::ifstream(path.c_str(), std::ios::binary);
+
+	std::cout << fileName << std::endl;
+	std::cout << path << std::endl;
 	assert(assetFile.is_open());
 
 	auto getSize = [](std::ifstream &assetFile) {
@@ -163,6 +192,7 @@ char* AssetAtlas::loadFile(std::string fileName) {
 
 //Wrapper function that takes a file name and sets up the data to load a tile array
 size_t AssetAtlas::loadTiles(std::string fileName) {
+	std::cout << "load tiles called!" << std::endl;
 	char* fileData = loadFile(fileName); //Get data from file
 	size_t n = *((size_t*)fileData);
 	size_t resVal = loadTilesHelp(n, (fileData + 8));
@@ -176,7 +206,7 @@ bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground,
 		size_t* nTiles = (size_t*)packedBackground;
 		if (nTiles == NULL) return false;
 		packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
-		packedBackground = (char*)(loadTiles(name));  //The return value is the start of the reference array
+		// packedBackground = (char*)(loadTilesHelp(*nTiles, packedBackground));  //The return value is the start of the reference array
 	}
 	if (!packedBackground) return false; 
 	return loadBGRefs(nameSize, name, packedBackground, isBG);  //Load the reference array
@@ -193,16 +223,26 @@ bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  backgroun
 	return resVal;
 }
 
+bool AssetAtlas::loadBG(char *packedBackground) {  //Loads a file for a  background
+	char* in = packedBackground; //data from file
+	size_t* nameSize = (size_t*)in;
+	if (nameSize == NULL) return false;
+	char* name = (in + 8);
+	char* bgArray = (name + *nameSize);
+	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,true)); //Load background given extracted variables
+	// free(in);
+	return resVal;
+}
+
+
 bool AssetAtlas::loadLevel(std::string fileName) {  //Loads a file for a  background
 	char* in = loadFile(fileName); //Get data from file
 	size_t* nameSize = (size_t*)in;
 	if (nameSize == NULL) return false;
 	char* name = (in + 8);
 	char* bgArray = (name + *nameSize);
-	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,false)); //Load background given extracted variables
+	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,false)); //Load level given extracted variables
 	free(in);
 	return resVal;
 }
-
-
-
+  

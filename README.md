@@ -1,8 +1,8 @@
-# (TODO: your game's title)
+# Adventure Climber
 
-Author: (TODO: your name)
+Author: Ben Cagan, George Whitfield, Woody McCoy
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: Traverse a dangerous mountain, avoiding the spikes and falls along the way!
 
 Screen Shot:
 
@@ -10,11 +10,11 @@ Screen Shot:
 
 How Your Asset Pipeline Works:
 
-(TODO: describe the steps in your asset pipeline, from source files to tiles/backgrounds/whatever you upload to the PPU466.)
+Firstly, we load in tiles from PNG images, and add them to the PPU. Then, we assembly the background procedurally, and generate the level by reading a layout from a png.
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+Arrow keys to move left and right, space to jump! Try to get as high as you can without dying to the spikes.
 
 Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
 
