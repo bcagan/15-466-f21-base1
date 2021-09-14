@@ -137,11 +137,6 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 	};
 
-	for (int i = 0; i < 8; i++)
-	{
-		std::cout << (int)ppu.tile_table[32].bit0[i] << std::endl;
-	}
-
 	importer.writeToPPU(&ppu, 0);
 
 	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
