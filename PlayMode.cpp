@@ -26,12 +26,8 @@ PlayMode::PlayMode() {
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 \
 	// step 1) read the tiles form the asset atlas
-	importer.LoadBackground(atlas);
-	importer.LoadLevel(atlas, "levels/dummy_level/png");
-	/*
-	importer.writePngToSave("TestLevel");
-	*/
-	//Remove and instead individually load tiles AND load backgrounds
+	//importer.LoadBackground(atlas);
+	//importer.LoadLevel(atlas, "levels/dummy_level/png");
 
 	// step 2) populate the ppu tiles, sprite locations, and background
 	for (int i = 0; i < atlas.tiles.size(); i++)
@@ -40,8 +36,48 @@ PlayMode::PlayMode() {
 		ppu.tile_table[i].bit1 = atlas.tiles[i].bit1;
 	}
 
-	LevelRetType level = atlas.getLevel("DefaultLevel");
-	curr_level = level.tiles;
+	{
+		std::array<TileRef, PPU466::BackgroundHeight * PPU466::BackgroundWidth> level_tiles = importer.GetPackedBackgroundFromPNG("levels/dummy_level");
+		for (int i = 0; i < 64; i ++)
+		{
+			for (int j = 0; j < 60; j++)
+			{
+				int index = 64 * i + j;
+				if (level_tiles[index].name == "player")
+				{
+					player_at.x = j;
+					player_at.y = i;
+				} else if (level_tiles[index].name == "light0")
+				{
+					lights_at.push_back(glm::vec2(j,i));
+					lights_type[index] = POINT; 
+				} else if (level_tiles[index].name == "light1")
+				{
+					lights_at.push_back(glm::vec2(j,i));
+					lights_type[index] = POINT; 
+					
+				} else if (level_tiles[index].name == "light2")
+				{
+					lights_at.push_back(glm::vec2(j,i));
+					lights_type[index] = SPOT; 
+
+				} else if (level_tiles[index].name == "wall")
+				{
+					walls_at.push_back(glm::vec2(j,i));
+				} else if (level_tiles[index].name == "goal")
+				{
+					goal_at.x = j;
+					goal_at.y = i;
+				} else if (level_tiles[index].name == "default")
+				{
+
+				}
+			}
+		}
+	}
+
+	//LevelRetType level = atlas.getLevel("Default");
+
 	for (int i = 0; i < curr_level.size(); i++)
 	{
 		// TileRef curr_tile = curr_level[i];

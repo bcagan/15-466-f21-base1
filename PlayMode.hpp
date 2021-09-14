@@ -87,9 +87,6 @@ struct PlayMode : Mode {
 	//some weird background animation:
 	float background_fade = 0.0f;
 
-
-
-
 	//Lighting
 	std::array<std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight>
 		, 3> backgroundColors; //0 = dark, 1 = partially lit, 2 = lit, each an array of pallets
@@ -104,8 +101,8 @@ struct PlayMode : Mode {
 	//----- drawing handled by PPU466 -----
 	PPU466 ppu;
 	//current background
-	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
-	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_level;
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_level;
 	unsigned default_wall_tile = 35;
 	unsigned default_light_tile = 36;
 	unsigned default_wall_pallete = 8;

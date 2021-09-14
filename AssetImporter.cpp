@@ -127,34 +127,31 @@ std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetImp
 		for (size_t j = 0; j < 60; j++)
 		{
 			size_t index = j * 64 + i;
-			//uint8_t tileIndex = (uint8_t) data[index].x;
-			/*
+			uint8_t tileIndex = (uint8_t) data[index].x;
+			
 			switch (tileIndex)
 			{
 			case 0:
 				result[index].name = "player";
 				break;
 			case 1:
-				result[index].name = "light";
+				result[index].name = "light0";
 				break;
 			case 2:
-				result[index].name = "goal";
+				result[index].name = "light1";
 				break;
 			case 3:
-				result[index].name = "wall";
+				result[index].name = "light2";
 				break;
 			case 4:
-				result[index].name = "platform";
+				result[index].name = "wall";
 				break;
 			case 5:
-				result[index].name = "background-wall";
+				result[index].name = "goal";
 			default:
 				result[index].name = "default";
 				break;
 			}
-			*/
-
-			result[index].name = "TestArrow";
 			result[index].nameSize = result[index].name.size();
 		}
 	}

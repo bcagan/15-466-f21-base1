@@ -205,7 +205,7 @@ bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground,
 		size_t* nTiles = (size_t*)packedBackground;
 		if (nTiles == NULL) return false;
 		packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
-		packedBackground = (char*)(loadTiles(name));  //The return value is the start of the reference array
+		packedBackground = (char*)(loadTilesHelp(*nTiles, packedBackground));  //The return value is the start of the reference array
 	}
 	if (!packedBackground) return false; 
 	return loadBGRefs(nameSize, name, packedBackground, isBG);  //Load the reference array
