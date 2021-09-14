@@ -40,7 +40,8 @@ private:
 
 	std::vector<std::string> files{ 
 		"empty",
-		"xBlock"
+		"xBlock",
+		"Spike"
 	};
 
 };
