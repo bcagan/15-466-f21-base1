@@ -35,7 +35,7 @@ public:
 		objList[1] = light1;
 		objList[2] = light2;
 	}
-	~ObjectTypes();
+	~ObjectTypes() {};
 	LightObj getObj(std::string objType);
 private:
 	std::vector<LightObj> objList;

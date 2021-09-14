@@ -25,7 +25,7 @@ struct AssetName {
 struct TileRef {
 	size_t nameSize; //Name of tile being referenced, and its size
 	std::string name;
-	std::array< glm::u8vec4, 4> pallet; //Pallets being used for given tile
+	uint8_t pallet; //Pallets being used for given tile
 };
 
 struct BGAsset {
@@ -46,7 +46,7 @@ struct BGAssetData {
 
 struct BGRetType {
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
-	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
+	std::array< uint8_t, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
 };
 
 struct LevelAsset {
@@ -63,7 +63,7 @@ struct LevelAssetData {
 
 struct LevelRetType {
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > tiles;
-	std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
+	std::array< uint8_t, PPU466::BackgroundWidth* PPU466::BackgroundHeight> pallets;
 };
 
 class AssetAtlas
@@ -145,12 +145,7 @@ public:
 
 		defaultRef.nameSize = 7;
 		defaultRef.name = "Default";
-		defaultRef.pallet = {
-			glm::u8vec4(0xFF, 0x00, 0x00, 0xFF),
-			glm::u8vec4(0x00, 0xFF, 0x00, 0xFF),
-			glm::u8vec4(0x00, 0x00, 0xFF, 0xFF),
-			glm::u8vec4(0x00, 0x00, 0x00, 0xFF),
-		};
+		defaultRef.pallet = 0;
 
 
 		defaultBG.name = "Default";
