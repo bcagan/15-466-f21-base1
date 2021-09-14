@@ -33,6 +33,8 @@ PlayMode::PlayMode() {
 		spikes_at.push_back(glm::vec2(4 * 8, 16));
 	}
 
+	importer.loadLevel("level1", &walls_at, &spikes_at);
+
 	{ //use tiles 0-16 as some weird dot pattern thing:
 		std::array< uint8_t, 8 * 8 > distance;
 		for (uint32_t y = 0; y < 8; ++y) {
@@ -104,17 +106,25 @@ PlayMode::PlayMode() {
 
 	//Spike pallete
 	ppu.palette_table[2] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+		glm::u8vec4(0xff, 0x00, 0x00, 0x8f),
 		glm::u8vec4(0x98,0x96,0x98,0xff),
 		glm::u8vec4(0x3c,0x3c,0x3c,0xff),
 		glm::u8vec4(0xec,0xee,0xec,0xff),
 	};
 
+	//Wall
+	ppu.palette_table[3] = {
+		glm::u8vec4(0x98,0x4b,0x00,0xff),
+		glm::u8vec4(0x25,0x25,0x25,0xff),
+		glm::u8vec4(0xec,0xee,0xec,0xff),
+		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	};
+
 	//used for the player:
 	ppu.palette_table[7] = {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0xff, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+		glm::u8vec4(0x98, 0x4b, 0x00, 0xff),
+		glm::u8vec4(0xe0, 0xac, 0x69, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 	};
 
@@ -289,20 +299,20 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	//background color will be some hsv-like fade:
 	ppu.background_color = glm::u8vec4(
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 0.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 1.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
+		0x44,
+		0x44,
+		0xff,
 		0xff
 	);
 
 	//background scroll:
-	ppu.background_position.x = int32_t(-0.5f * player_at.x);
-	ppu.background_position.y = int32_t(-0.5f * player_at.y);
+	ppu.background_position.x = int32_t(.6f * player_at.x);
+	ppu.background_position.y = 0;// int32_t(player_at.y);
 
 	//player sprite:
 	ppu.sprites[0].x = int32_t(player_at.x);
 	ppu.sprites[0].y = int32_t(player_at.y);
-	ppu.sprites[0].index = 32;
+	ppu.sprites[0].index = 4;
 	ppu.sprites[0].attributes = 7;
 
 	size_t offset1 = 1;
@@ -310,8 +320,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	{
 		ppu.sprites[k + offset1].x = int32_t(walls_at[k].x);
 		ppu.sprites[k + offset1].y = int32_t(walls_at[k].y);
-		ppu.sprites[k + offset1].index = 32;
-		ppu.sprites[k + offset1].attributes = 7;
+		ppu.sprites[k + offset1].index = 3;
+		ppu.sprites[k + offset1].attributes = 3;
 	}
 
 	size_t offset2 = offset1 + walls_at.size();

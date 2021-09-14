@@ -25,6 +25,9 @@ public:
 	void LoadLevel(AssetAtlas atlas, std::string levelName);
 	void writeToPPU(PPU466 *ppu, size_t startIndex);
 
+	void loadLevel(std::string filename, std::vector<glm::vec2> *walls_at, std::vector<glm::vec2> *spikes_at);
+
+
 	std::vector<PPU466::Tile> tilesToSave;
 	//AssetAtlas atlas;
 
@@ -41,7 +44,9 @@ private:
 	std::vector<std::string> files{ 
 		"empty",
 		"xBlock",
-		"Spike"
+		"Spike",
+		"Wall",
+		"Player"
 	};
 
 };
