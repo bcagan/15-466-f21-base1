@@ -11,12 +11,6 @@
 #include <random>
 
 PlayMode::PlayMode() {
-	//TODO:
-	// you *must* use an asset pipeline of some sort to generate tiles.
-	// don't hardcode them like this!
-	// or, at least, if you do hardcode them like this,
-	//  make yourself a script that spits out the code that you paste in here
-	//   and check that script into your repository.
 
 	AssetImporter importer;
 
@@ -24,6 +18,11 @@ PlayMode::PlayMode() {
 
 
 	//Also, *don't* use these tiles in your game:
+	player_at = initPos;
+
+	{ //walls
+		walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1));
+	}
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
 		std::array< uint8_t, 8*8 > distance;
@@ -128,6 +127,11 @@ PlayMode::PlayMode() {
 PlayMode::~PlayMode() {
 }
 
+void PlayMode::resetPlayer() {
+	player_at = initPos;
+	grounded = true;
+}
+
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
 
 	if (evt.type == SDL_KEYDOWN) {
@@ -148,6 +152,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = true;
 			return true;
 		}
+		else if (evt.key.keysym.sym == SDLK_SPACE) {
+			space.downs += 1;
+			space.pressed = true;
+			return true;
+		}
 	} else if (evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.sym == SDLK_LEFT) {
 			left.pressed = false;
@@ -158,8 +167,14 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 		} else if (evt.key.keysym.sym == SDLK_UP) {
 			up.pressed = false;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
+		}
+		else if (evt.key.keysym.sym == SDLK_DOWN) {
 			down.pressed = false;
+			return true;
+		}
+		else if (evt.key.keysym.sym == SDLK_SPACE)
+		{
+			space.pressed = false;
 			return true;
 		}
 	}
@@ -174,17 +189,82 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
-	constexpr float PlayerSpeed = 30.0f;
-	if (left.pressed) player_at.x -= PlayerSpeed * elapsed;
-	if (right.pressed) player_at.x += PlayerSpeed * elapsed;
-	if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
-	if (up.pressed) player_at.y += PlayerSpeed * elapsed;
+	{ //handle player collisions with walls
+		for (auto w = walls_at.begin(); w < walls_at.end(); w++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the left of (*w)
+				player_at.x = (*w).x - 8;
+			}
+			else if (player_at_floor_x - 8 + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			{ //collides to the right
+				player_at.x = (*w).x + 8;
+			}
+			else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides above
+				grounded = true;
+				player_at.y = (*w).y + 8;
+				player_velocity.y = 0;
+			}
+			else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			{ //collides below
+				player_at.y = (*w).y - 8;
+			}
+		}
+		//Handle collision detection for spikes
+		for (auto s = spikes_at.begin(); s < spikes_at.end(); s++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			if (player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
+			{ //collides above
+				resetPlayer();
+				player_velocity.y = 0;
+			}
+		}
+	}
 
-	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
+	constexpr float PlayerSpeed = 30.0f;
+	player_velocity.x = 0;
+	if (left.pressed) player_velocity.x -= PlayerSpeed;
+	if (right.pressed) player_velocity.x += PlayerSpeed;
+
+	if (space.pressed && space.held < max_jump_time && grounded)
+	{
+		jumping = true;
+		space.held += elapsed;
+		if (space.held < max_jump_time)
+		{
+			player_velocity.y = jump_speed;
+		}
+	}
+	else
+	{
+		grounded = false;
+		if (space.held > 0.0f && jumping)
+		{
+			player_velocity.y = 0.0f;
+			jumping = false;
+		}
+		if (!space.pressed)
+		{
+			space.held = 0.0f;
+		}
+	}
+
+	player_velocity.y += gravity * elapsed;
+	player_at += player_velocity * elapsed;
+
+	//Bounds check!
+	if (player_at.y <= 0)
+	{
+		player_at.y = 0;
+		player_velocity.y = 0;
+		grounded = true;
+	}
+	
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
@@ -197,6 +277,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
 		0xff
 	);
+	
 
 	//tilemap gets recomputed every frame as some weird plasma thing:
 	//NOTE: don't do this in your game! actually make a map or something :-)
@@ -217,8 +298,18 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.sprites[0].index = 32;
 	ppu.sprites[0].attributes = 7;
 
+	unsigned k = 1;
+	for (; k < walls_at.size(); k++)
+	{
+		std::cout << ppu.sprites[k].x << std::endl;
+		ppu.sprites[k].x = int32_t(walls_at[k].x);
+		ppu.sprites[k].y = int32_t(walls_at[k].y);
+		ppu.sprites[k].index = 32;
+		ppu.sprites[k].attributes = 7;
+	}
+
 	//some other misc sprites:
-	for (uint32_t i = 1; i < 63; ++i) {
+	for (uint32_t i = k; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
