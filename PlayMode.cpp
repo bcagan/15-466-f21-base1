@@ -13,7 +13,11 @@ PlayMode::PlayMode() {
 	player_at = initPos;
 
 	{ //walls
-		walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1));
+		for (int i = 0; i < 30; i++)
+		{
+			float x = i % 2 * -1 * (i * 121) % 256;
+			walls_at.push_back(glm::vec2(uint8_t(x), uint8_t((float)240 * ((float)i / 30))));
+		}
 	}
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
