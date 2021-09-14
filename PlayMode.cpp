@@ -511,6 +511,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 
 
+*/
 
 //x,y, in [256,240]
 void PlayMode::updatePallet() {
@@ -527,7 +528,6 @@ void PlayMode::updatePallet() {
 		}
 	}
 }
-*/
 
 //x,y, in [256,240]
 /*void PlayMode::updateLightLevels() {
@@ -556,7 +556,7 @@ void PlayMode::player_died()
 void PlayMode::draw_gameplay()
 {
 	//--- set ppu state based on game state ---
-	//curr_bg = atlas.getBG("Default").tiles;
+	curr_bg = atlas.getBG("Default").tiles;
 
 	//background color will be some hsv-like fade:
 	ppu.background_color = glm::u8vec4(
