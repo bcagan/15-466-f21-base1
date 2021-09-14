@@ -26,16 +26,16 @@ PlayMode::PlayMode() {
 	}
 
 	{//Spikes
-		spikes_at.push_back(glm::vec2(4*8, 8));
+		spikes_at.push_back(glm::vec2(4 * 8, 16));
 	}
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
-		std::array< uint8_t, 8*8 > distance;
+		std::array< uint8_t, 8 * 8 > distance;
 		for (uint32_t y = 0; y < 8; ++y) {
 			for (uint32_t x = 0; x < 8; ++x) {
 				float d = glm::length(glm::vec2((x + 0.5f) - 4.0f, (y + 0.5f) - 4.0f));
 				d /= glm::length(glm::vec2(4.0f, 4.0f));
-				distance[x+8*y] = std::max(0,std::min(255,int32_t( 255.0f * d )));
+				distance[x + 8 * y] = std::max(0, std::min(255, int32_t(255.0f * d)));
 			}
 		}
 		for (uint32_t index = 0; index < 16; ++index) {
@@ -45,10 +45,11 @@ PlayMode::PlayMode() {
 				uint8_t bit0 = 0;
 				uint8_t bit1 = 0;
 				for (uint32_t x = 0; x < 8; ++x) {
-					uint8_t d = distance[x+8*y];
+					uint8_t d = distance[x + 8 * y];
 					if (d > t) {
 						bit0 |= (1 << x);
-					} else {
+					}
+					else {
 						bit1 |= (1 << x);
 					}
 				}
@@ -96,6 +97,14 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 	};
+
+	//Spike pallete
+	ppu.palette_table[2] = {
+		glm::u8vec4(0x00 0x00 0x00 0x00),
+		glm::u8vec4(0x98,0x96,0x98,0xff),
+		glm::u8vec4(0x3c,0x3c,0x3c,0xff),
+		glm::u8vec4(0xec,0xee,0xec,0xff)
+	}
 
 	//used for the player:
 	ppu.palette_table[7] = {
@@ -187,6 +196,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 }
 
 void PlayMode::update(float elapsed) {
+
+	std::cout << immune << " " << grounded << std::endl;
 
 	//slowly rotates through [0,1):
 	// (will be used to set background color)
