@@ -261,18 +261,18 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.sprites[0].index = 32;
 	ppu.sprites[0].attributes = 7;
 
-	unsigned k = 1;
-	for (; k < walls_at.size(); k++)
+	unsigned offset1 = 1;
+	for (unsigned k = 0; k < walls_at.size(); k++)
 	{
-		std::cout << ppu.sprites[k].x << std::endl;
-		ppu.sprites[k].x = int32_t(walls_at[k].x);
-		ppu.sprites[k].y = int32_t(walls_at[k].y);
-		ppu.sprites[k].index = 32;
-		ppu.sprites[k].attributes = 7;
+		ppu.sprites[k + offset1].x = int32_t(walls_at[k].x);
+		ppu.sprites[k + offset1].y = int32_t(walls_at[k].y);
+		ppu.sprites[k + offset1].index = 32;
+		ppu.sprites[k + offset1].attributes = 7;
 	}
 
+	unsigned offset2 = offset1 + walls_at.size();
 	//some other misc sprites:
-	for (uint32_t i = k; i < 63; ++i) {
+	for (uint32_t i = offset2; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
