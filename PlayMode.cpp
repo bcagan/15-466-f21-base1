@@ -113,15 +113,14 @@ PlayMode::PlayMode() {
 		std::cout << (int)ppu.tile_table[32].bit0[i] << std::endl;
 	}
 
-	importer.writeToPPU(&ppu, 32);
+	importer.writeToPPU(&ppu, 0);
 
-	std::cout << std::endl;
-
-	for (int i = 0; i < 8; i++)
-	{
-		std::cout << (int)ppu.tile_table[32].bit0[i] << std::endl;
+	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
+		for (uint32_t x = 0; x < PPU466::BackgroundWidth; ++x) {
+			//TODO: make weird plasma thing
+			ppu.background[x + PPU466::BackgroundWidth * y] = ((x + y) % 2);
+		}
 	}
-
 }
 
 PlayMode::~PlayMode() {
@@ -277,16 +276,6 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
 		0xff
 	);
-	
-
-	//tilemap gets recomputed every frame as some weird plasma thing:
-	//NOTE: don't do this in your game! actually make a map or something :-)
-	for (uint32_t y = 0; y < PPU466::BackgroundHeight; ++y) {
-		for (uint32_t x = 0; x < PPU466::BackgroundWidth; ++x) {
-			//TODO: make weird plasma thing
-			ppu.background[x+PPU466::BackgroundWidth*y] = ((x+y)%16);
-		}
-	}
 
 	//background scroll:
 	ppu.background_position.x = int32_t(-0.5f * player_at.x);

@@ -39,7 +39,8 @@ private:
 	std::string backgroundName = "backgrounds/bg";
 
 	std::vector<std::string> files{ 
-		"TestArrow"
+		"empty",
+		"xBlock"
 	};
 
 };
