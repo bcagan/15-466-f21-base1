@@ -31,6 +31,7 @@ struct PlayMode : Mode {
 	float background_fade = 0.0f;
 
 	//player position:
+	glm::vec2 player_at = glm::vec2(0.0f);
 	glm::vec2 player_velocity = glm::vec2(0.0f);
 	float gravity = -120.0f;
 	float max_jump_time = 0.4f;
@@ -39,7 +40,6 @@ struct PlayMode : Mode {
 	bool grounded = false;
 	bool immune;
 	glm::vec2 initPos = glm::vec2(0.0f);
-	glm::vec2 player_at;
 
 	// walls and spikes
 	std::vector<glm::vec2> walls_at;
