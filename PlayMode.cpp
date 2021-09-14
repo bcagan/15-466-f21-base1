@@ -107,6 +107,7 @@ PlayMode::~PlayMode() {
 
 void PlayMode::resetPlayer() {
 	player_at = initPos;
+	grounded = true;
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
@@ -174,17 +175,31 @@ void PlayMode::update(float elapsed) {
 			if (player_at_floor_x + 8 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
 			{ //collides to the left of (*w)
 				player_at.x = (*w).x - 8;
-			} else if (player_at_floor_x - 8  + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
+			}
+			else if (player_at_floor_x - 8 + 1 == (*w).x && (*w).y - 7 <= player_at_floor_y && player_at_floor_y <= (*w).y + 7)
 			{ //collides to the right
 				player_at.x = (*w).x + 8;
-			} else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			}
+			else if (player_at_floor_y - 8 + 1 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
 			{ //collides above
 				grounded = true;
 				player_at.y = (*w).y + 8;
 				player_velocity.y = 0;
-			} else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
+			}
+			else if (player_at_floor_y + 8 == (*w).y && (*w).x - 7 <= player_at_floor_x && player_at_floor_x <= (*w).x + 7)
 			{ //collides below
 				player_at.y = (*w).y - 8;
+			}
+		}
+		//Handle collision detection for spikes
+		for (auto s = spikes_at.begin(); w < spikes_at.end(); w++)
+		{
+			unsigned player_at_floor_x = (int)floor(player_at.x);
+			unsigned player_at_floor_y = (int)floor(player_at.y);
+			if (player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
+			{ //collides above
+				resetPlayer();
+				player_velocity.y = 0;
 			}
 		}
 	}

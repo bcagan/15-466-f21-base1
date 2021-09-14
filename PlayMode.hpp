@@ -31,21 +31,18 @@ struct PlayMode : Mode {
 	float background_fade = 0.0f;
 
 	//player position:
-<<<<<<< HEAD
-	glm::vec2 player_at = glm::vec2(0.0f);
 	glm::vec2 player_velocity = glm::vec2(0.0f);
 	float gravity = -120.0f;
 	float max_jump_time = 0.4f;
 	float jump_speed = 60.0f;
 	bool jumping = false;
 	bool grounded = false;
-
-	// walls
-	std::vector<glm::vec2> walls_at;
-=======
 	glm::vec2 initPos = glm::vec2(0.0f);
 	glm::vec2 player_at;
->>>>>>> 29f9cb29dcb7fa7e2efa9138cacf444ac498b75f
+
+	// walls and spikes
+	std::vector<glm::vec2> walls_at;
+	std::vector<glm::vec2> spikes_at;
 
 	//----- drawing handled by PPU466 -----
 
