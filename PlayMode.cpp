@@ -21,12 +21,11 @@ PlayMode::PlayMode() {
 
 	//Create a new atlas, load all saved pngs into it.
 	importer.LoadTiles(atlas);
-
-	//atlas = AssetAtlas();
 	walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1)); // test wall
 \
 	// step 1) read the tiles form the asset atlas
-	//importer.LoadBackground(atlas);
+	importer.LoadBackground(atlas);
+	
 	//importer.LoadLevel(atlas, "levels/dummy_level/png");
 
 	// step 2) populate the ppu tiles, sprite locations, and background
@@ -55,7 +54,6 @@ PlayMode::PlayMode() {
 				{
 					lights_at.push_back(glm::vec2(j,i));
 					lights_type[index] = POINT; 
-					
 				} else if (level_tiles[index].name == "light2")
 				{
 					lights_at.push_back(glm::vec2(j,i));

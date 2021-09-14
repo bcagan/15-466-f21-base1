@@ -244,7 +244,19 @@ void AssetImporter::LoadTiles(AssetAtlas atlas)
 void AssetImporter::LoadBackground(AssetAtlas atlas)
 {
 	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> packedBackground = GetPackedBackgroundFromPNG(backgroundName);
-	atlas.loadBG(reinterpret_cast<char*>(&packedBackground));
+	
+	unsigned packBackSize = sizeof(TileRef) * packedBackground.size();
+	unsigned bgSize = sizeof(size_t*) + packBackSize;
+	char *c = new char[bgSize];
+	// size of tile array = 0
+	for (int i = 0; i < 8; i++)
+		c[i] = 0;
+	char* pb = &(c[8]);
+	for (int i = 0; i < packBackSize; i++)
+	{
+		pb[i] = reinterpret_cast<char*>(&packedBackground)[i];
+	}
+	atlas.loadBG(pb);
 }
 
 void AssetImporter::LoadLevel(AssetAtlas atlas, std::string levelName)

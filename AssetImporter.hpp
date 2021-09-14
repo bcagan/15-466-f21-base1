@@ -48,11 +48,13 @@ private:
 	std::string backgroundName = "backgrounds/bg";
 
 	std::vector<std::string> files{ 
-		"TestArrow"
+		"TestArrow",
+		"Default"
 	};
 
 	std::vector<std::string> names{
-		"Arrow"
+		"Arrow",
+		"Default"
 	};
 
 };

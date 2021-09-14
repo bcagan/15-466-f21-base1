@@ -192,6 +192,7 @@ char* AssetAtlas::loadFile(std::string fileName) {
 
 //Wrapper function that takes a file name and sets up the data to load a tile array
 size_t AssetAtlas::loadTiles(std::string fileName) {
+	std::cout << "load tiles called!" << std::endl;
 	char* fileData = loadFile(fileName); //Get data from file
 	size_t n = *((size_t*)fileData);
 	size_t resVal = loadTilesHelp(n, (fileData + 8));
@@ -205,7 +206,7 @@ bool AssetAtlas::loadBGHelp(size_t nameSize, char* name, char* packedBackground,
 		size_t* nTiles = (size_t*)packedBackground;
 		if (nTiles == NULL) return false;
 		packedBackground = packedBackground + 8; //First load number of tiles, and the tileArray itself
-		packedBackground = (char*)(loadTilesHelp(*nTiles, packedBackground));  //The return value is the start of the reference array
+		// packedBackground = (char*)(loadTilesHelp(*nTiles, packedBackground));  //The return value is the start of the reference array
 	}
 	if (!packedBackground) return false; 
 	return loadBGRefs(nameSize, name, packedBackground, isBG);  //Load the reference array
@@ -229,7 +230,7 @@ bool AssetAtlas::loadBG(char *packedBackground) {  //Loads a file for a  backgro
 	char* name = (in + 8);
 	char* bgArray = (name + *nameSize);
 	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,true)); //Load background given extracted variables
-	free(in);
+	// free(in);
 	return resVal;
 }
 
