@@ -1,6 +1,7 @@
 #include "PPU466.hpp"
 #include "Mode.hpp"
 #include "AssetLoad.h"
+#include "AssetImporter.hpp"
 
 #include <glm/glm.hpp>
 
@@ -27,9 +28,10 @@ struct PlayMode : Mode {
 
 	GameState curr_state;
 	GameState next_state;
-	// ----- asset importing -----
-	AssetAtlas atlas;
 
+	// ----- asset importing/loading -----
+	AssetAtlas atlas;
+	AssetImporter importer;
 
 	//functions called by main loop:
 	virtual bool handle_event(SDL_Event const &, glm::uvec2 const &window_size) override;
@@ -38,9 +40,19 @@ struct PlayMode : Mode {
 
 	//----- game state -----
 	//player position:
+	int SPRITES_MAX = 64;
 	glm::vec2 player_at = glm::vec2(0.0f);
-	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>();
-	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>();
+	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>(SPRITES_MAX);
+	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>(SPRITES_MAX);
+
+	enum LightType 
+	{
+		POINT = 0,
+		SPOT = 1,
+	};
+
+	std::vector<LightType> lights_type = std::vector<LightType>(SPRITES_MAX);
+	
 	//Can we also have a vector the same size as lights_at which indicates the light type? Could be a Light object reference
 
 	//player velocity

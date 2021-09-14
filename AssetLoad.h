@@ -170,5 +170,6 @@ public:
 
 	size_t loadTiles(std::string fileName); //Loads an array of tiles
 	bool loadBG(std::string fileName);  //Loads an array of backgrounds
+	bool loadLevel(std::string fileName); //Loads a level, which is encoded as a background
 
 };

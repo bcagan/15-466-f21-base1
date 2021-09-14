@@ -82,7 +82,7 @@ bool AssetAtlas::loadTile(size_t nameSize,char* name, uint64_t* packedTile) {
 //Loads the reference data from the background data loaded in previously into the last entry in the background data vector
 bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground, bool isBG) {
 
-	auto unPack = [this](char* backgroundRef) { //Lambda to interpret packed background data as an array of tileRefs
+	auto unPackBG = [this](char* backgroundRef) { //Lambda to interpret packed background data as an array of tileRefs
 		//BackgroundHeight * BackgroundWidth in size
 		std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > retBackground;
 		size_t refSize = sizeof(TileRef);
@@ -93,6 +93,8 @@ bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground,
 		}
 		return retBackground;
 	};
+
+	//auto unPackLevel = [](){}; // TODO: add unpacking function for level
 
 	if (packedBackground == NULL) return (char*)false; //Safety check (NULL pointer is same as false in this case)
 	if (bgNum == bgs.size()) { //If needed, resize
@@ -111,12 +113,12 @@ bool AssetAtlas::loadBGRefs(size_t nameSize, char* name, char* packedBackground,
 	if(isBG){
 		bgNameList[bgNum].name = std::string(name,nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
 		bgNameList[bgNum].nameSize = nameSize;
-		bgs[bgNum].background = unPack(packedBackground);
+		bgs[bgNum].background = unPackBG(packedBackground);
 	}
 	else {
 		levelNameList[levelNum].name = std::string(name, nameSize); //Load name, nameSize, and newly created tileRef array into back of bg data vector
 		levelNameList[levelNum].nameSize = nameSize;
-		//levels[bgNum].level = //Put your unpacking function here;
+		levels[levelNum].level = unPackBG(packedBackground);
 	}
 	return true; //Return adress (as size_t) of next background
 }
@@ -190,5 +192,17 @@ bool AssetAtlas::loadBG(std::string fileName) {  //Loads a file for a  backgroun
 	free(in);
 	return resVal;
 }
+
+bool AssetAtlas::loadLevel(std::string fileName) {  //Loads a file for a  background
+	char* in = loadFile(fileName); //Get data from file
+	size_t* nameSize = (size_t*)in;
+	if (nameSize == NULL) return false;
+	char* name = (in + 8);
+	char* bgArray = (name + *nameSize);
+	bool resVal =  (loadBGHelp(*nameSize, name, bgArray,false)); //Load background given extracted variables
+	free(in);
+	return resVal;
+}
+
 
 

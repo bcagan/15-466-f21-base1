@@ -6,6 +6,7 @@
 #include <iostream>
 #include "read_write_chunk.hpp"
 #include <fstream>
+#include <PPU466.hpp>
 
 #if defined(__APPLE__)
 #include <unistd.h>
@@ -81,6 +82,53 @@ void AssetImporter::WritePngsToFile()
 	}
 }
 
+std::array<uint16_t, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetImporter::GetBackgroundFromPNG()
+{
+	std::string path = data_path(backgroundName + extension);
+	glm::uvec2 size;
+	std::vector< glm::u8vec4 > data;
+
+	#if defined(_WIN32)
+		if (std::filesystem::exists(img_path))
+		{
+			load_png(img_path, &size, &data, LowerLeftOrigin);
+		}
+		else
+		{
+			std::cout << "File does not exist!";
+		}
+	#else
+		// code for access based on https://stackoverflow.com/questions/8580606/c-c-mac-os-x-check-if-file-exists
+		int r = access(img_path.c_str(), R_OK);
+		if (r == ENOENT)
+		{
+			std::cout << "File did not exist!" << std::endl;
+		}
+		else if (r == EACCES)
+		{
+			std::cout << "File is not readable!" << std::endl;
+		}
+		else if (r > 0) //file read successful
+		{
+			load_png(img_path, &size, &data, LowerLeftOrigin);
+		}
+		else {
+			std::cout << "Error with file access" << std::endl;
+		}
+	#endif
+
+	assert(size.x == 64 && size.y == 60);
+
+	for (size_t i = 0; i < 64; i++)
+	{
+		for (size_t j = 0; j < 60; j++)
+		{
+			size_t index = j * 64 + i;
+			uint8_t tileIndex = (uint8_t) data[index].x;
+		}
+	}
+}
+
 //Cheap an easy way right now is to use the RBG data
 void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name)
 {
@@ -122,8 +170,6 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 
 	//Copy the name in!
 	std::copy(name.begin(), name.end(), std::back_inserter(namesToSave));
-
-
 }
 
 void AssetImporter::LoadTiles(AssetAtlas atlas)
@@ -150,6 +196,7 @@ void AssetImporter::LoadTiles(AssetAtlas atlas)
 		//Set up asset data first
 		for (int shift = 0; i < 8; i++)
 		{
+			(void)shift;
 			assetData.bit0[i] = (uint8_t)(current.bit0 >> (i * 8));
 			assetData.bit1[i] = (uint8_t)(current.bit1 >> (i * 8));
 		}
