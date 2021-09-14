@@ -16,12 +16,17 @@ PlayMode::PlayMode() {
 
 	importer.LoadPNGS();
 
+	immune = false;
 
 	//Also, *don't* use these tiles in your game:
 	player_at = initPos;
 
 	{ //walls
 		walls_at.push_back(glm::vec2(PPU466::ScreenWidth / 2, 1));
+	}
+
+	{//Spikes
+		spikes_at.push_back(glm::vec2(4*8, 8));
 	}
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
@@ -189,6 +194,8 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
+	if (grounded && immune) immune = false;
+
 	{ //handle player collisions with walls
 		for (auto w = walls_at.begin(); w < walls_at.end(); w++)
 		{
@@ -218,10 +225,14 @@ void PlayMode::update(float elapsed) {
 		{
 			unsigned player_at_floor_x = (int)floor(player_at.x);
 			unsigned player_at_floor_y = (int)floor(player_at.y);
-			if (player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
+			if (!immune && player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
 			{ //collides above
 				resetPlayer();
 				player_velocity.y = 0;
+			}
+			else if (player_at_floor_y + 8 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
+			{ //collides below
+				immune = true;
 			}
 		}
 	}
