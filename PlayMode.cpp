@@ -3,6 +3,8 @@
 //for the GL_ERRORS() macro:
 #include "gl_errors.hpp"
 
+#include "AssetImporter.hpp"
+
 //for glm::value_ptr() :
 #include <glm/gtc/type_ptr.hpp>
 
@@ -15,6 +17,11 @@ PlayMode::PlayMode() {
 	// or, at least, if you do hardcode them like this,
 	//  make yourself a script that spits out the code that you paste in here
 	//   and check that script into your repository.
+
+	AssetImporter importer;
+
+	importer.LoadPNGS();
+
 
 	//Also, *don't* use these tiles in your game:
 
@@ -101,6 +108,20 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 	};
+
+	for (int i = 0; i < 8; i++)
+	{
+		std::cout << (int)ppu.tile_table[32].bit0[i] << std::endl;
+	}
+
+	importer.writeToPPU(&ppu, 32);
+
+	std::cout << std::endl;
+
+	for (int i = 0; i < 8; i++)
+	{
+		std::cout << (int)ppu.tile_table[32].bit0[i] << std::endl;
+	}
 
 }
 

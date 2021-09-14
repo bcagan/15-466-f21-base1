@@ -21,7 +21,7 @@ AssetImporter::AssetImporter()
 	
 }
 
-void AssetImporter::WritePngsToFile()
+void AssetImporter::LoadPNGS()
 {
 	std::string path = data_path("");
 	//Ends with wrong slash, so we remove and replace it.
@@ -33,7 +33,6 @@ void AssetImporter::WritePngsToFile()
 	for (int i = 0; i < files.size(); i++)
 	{
 		std::string filename = files[i];
-		std::string asset_name = names[i];
 
 		std::string img_path = path + subPath + filename + extension;
 
@@ -46,7 +45,7 @@ void AssetImporter::WritePngsToFile()
 		if (std::filesystem::exists(img_path))
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
-			writePngToSave(size, data, asset_name);
+			writePngToSave(size, data);
 		}
 		else
 		{
@@ -66,22 +65,16 @@ void AssetImporter::WritePngsToFile()
 		else if (r >= 0) //file read successful
 		{
 			load_png(img_path, &size, &data, LowerLeftOrigin);
-			writePngToSave(size, data, asset_name);
+			writePngToSave(size, data);
 		}
 		else {
 			std::cout << "Error with file access" << std::endl;
 		}
 #endif
-
-		//Tiles are now all pushed back, so we need to write them out!
-		std::ofstream ofsTiles(data_path("tileSave.dat"), std::ofstream::out);
-		write_chunk("tile", tilesToSave, &ofsTiles);
-
-		std::ofstream ofsNames(data_path("nameSave.dat"), std::ofstream::out);
-		write_chunk("name", namesToSave, &ofsNames);
 	}
 }
 
+/*
 std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetImporter::GetPackedBackgroundFromPNG(std::string bgName)
 {
 	std::string path = data_path(bgName + extension);
@@ -158,11 +151,11 @@ std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> AssetImp
 
 	return result;
 }
-
-
+*/
 //Cheap an easy way right now is to use the RBG data
-void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data, std::string name)
+void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > data)
 {
+
 	if (size.x != 8 || size.y != 8)
 	{
 		std::cout << "Size of image is wrong! Aborting..." << std::endl;
@@ -171,76 +164,54 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 
 	int64_t bit0 = 0;
 	int64_t bit1 = 0;
-	long longOne = 1;
+
+	PPU466::Tile save_data;
 
 	for (int i = 0; i < 8; i++)
 	{
+		uint8_t bit0 = 0;
+		uint8_t bit1 = 0;
 		for (int j = 0; j < 8; j++)
 		{
 			int bit_index = j * 8 + i;
 			glm::u8vec4 pixel = data[bit_index];
+			std::cout << "Data at " << i << ", " << j << " is: " << (int) pixel.x << std::endl;
 			if (pixel.x > 0)
 			{
-				bit0 = bit0 | longOne << bit_index;
+				bit0 = bit0 | (1 << j);
 			}
 			if (pixel.y > 0)
 			{
-				bit1 = bit1 | longOne << bit_index;
+				bit1 = bit1 | (1 << j);
 			}
 		}
+		save_data.bit0[i] = bit0;
+		save_data.bit1[i] = bit1;
+		std::cout << (int)bit0 << std::endl;
 	}
 
-	tileSaveData save_data;
-
-	save_data.bit0 = bit0;
-	save_data.bit1 = bit1;
-	save_data.nameStart = namesToSave.size();
-	save_data.nameEnd = namesToSave.size() + name.size();
+	
 
 	tilesToSave.push_back(save_data);
-
-	//Copy the name in!
-	std::copy(name.begin(), name.end(), std::back_inserter(namesToSave));
 }
 
-void AssetImporter::LoadTiles(AssetAtlas atlas)
+void AssetImporter::writeToPPU(PPU466 *ppu, size_t startIndex)
 {
-	std::vector<tileSaveData> tileSaved;
-	std::vector<char> charSaved;
-
-	std::ifstream ifsTile(data_path("tileSave.dat"), std::ifstream::in);
-	read_chunk(ifsTile, "tile", &tileSaved);
-
-	std::ifstream ifsName(data_path("nameSave.dat"), std::ifstream::in);
-	read_chunk(ifsName, "name", &charSaved);
-
-	//Clear old tiles
-	//atlas.tiles.clear();
-	//atlas.tileNameList.clear();
-
-	for (int i = 0; i < tileSaved.size(); i++)
+	for (int i = 0; i < tilesToSave.size(); i++)
 	{
-		tileSaveData current = tileSaved[i];
-		TileAssetData assetData;
-		AssetName assetName;
-
-		//Set up asset data first
-		for (int shift = 0; i < 8; i++)
+		std::cout << "Writing to index " << (startIndex + i) << std::endl;
+		for (int j = 0; j < 8; j++)
 		{
-			(void)shift;
-			assetData.bit0[i] = (uint8_t)(current.bit0 >> (i * 8));
-			assetData.bit1[i] = (uint8_t)(current.bit1 >> (i * 8));
+			std::cout << (int)tilesToSave[i].bit0[j] << std::endl;
 		}
-
-		assetName.name = std::string(charSaved.begin() + current.nameStart, charSaved.begin() + current.nameEnd);
-		assetName.nameSize = assetName.name.size();
-
-		//Push them back!
-		atlas.tiles.push_back(assetData);
-		atlas.tileNameList.push_back(assetName);
+		ppu->tile_table[startIndex + i].bit0 = tilesToSave[i].bit0;
+		ppu->tile_table[startIndex + i].bit1 = tilesToSave[i].bit1;
 	}
 }
 
+
+
+/*
 void AssetImporter::LoadBackground(AssetAtlas atlas)
 {
 	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> packedBackground = GetPackedBackgroundFromPNG(backgroundName);
@@ -263,7 +234,7 @@ void AssetImporter::LoadLevel(AssetAtlas atlas, std::string levelName)
 {
 	std::array<TileRef, PPU466::BackgroundWidth * PPU466::BackgroundHeight> packedBackground = GetPackedBackgroundFromPNG(levelName);
 	atlas.loadBG(reinterpret_cast<char*>(&packedBackground));
-}
+}*/
 
 AssetImporter::~AssetImporter()
 {
