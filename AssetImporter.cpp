@@ -164,7 +164,9 @@ void AssetImporter::writePngToSave(glm::uvec2 size, std::vector< glm::u8vec4 > d
 
 	int64_t bit0 = 0;
 	int64_t bit1 = 0;
-
+	(void)bit0;
+	(void)bit1;
+	
 	PPU466::Tile save_data;
 
 	for (int i = 0; i < 8; i++)

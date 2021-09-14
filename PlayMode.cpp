@@ -24,8 +24,10 @@ PlayMode::PlayMode() {
 	{ //walls
 		for (int i = 0; i < 30; i++)
 		{
-			float x = i % 2 * -1 * (i * 121) % 256;
-			walls_at.push_back(glm::vec2(uint8_t(x), uint8_t((float)240 * ((float)i / 30))));
+			float x = (i * 17);
+			if (int(x) % 2 == 0) x = -x;
+			float y = (float)240 * (float)i / 30;
+			walls_at.push_back(glm::vec2(uint8_t(x) % 256, uint8_t(y) % 240));
 		}
 	}
 
