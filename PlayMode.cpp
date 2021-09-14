@@ -16,15 +16,13 @@ PlayMode::PlayMode() {
 
 	importer.LoadPNGS();
 
-	immune = false;
-
 	//Also, *don't* use these tiles in your game:
 	player_at = initPos;
 
 	{ //walls
 		for (int i = 0; i < 30; i++)
 		{
-			float x = (i * 17);
+			float x = ((float)i * 17);
 			if (int(x) % 2 == 0) x = -x;
 			float y = (float)240 * (float)i / 30;
 			walls_at.push_back(glm::vec2(uint8_t(x) % 256, uint8_t(y) % 240));
@@ -106,11 +104,11 @@ PlayMode::PlayMode() {
 
 	//Spike pallete
 	ppu.palette_table[2] = {
-		glm::u8vec4(0x00 0x00 0x00 0x00),
+		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
 		glm::u8vec4(0x98,0x96,0x98,0xff),
 		glm::u8vec4(0x3c,0x3c,0x3c,0xff),
-		glm::u8vec4(0xec,0xee,0xec,0xff)
-	}
+		glm::u8vec4(0xec,0xee,0xec,0xff),
+	};
 
 	//used for the player:
 	ppu.palette_table[7] = {
@@ -203,14 +201,10 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void PlayMode::update(float elapsed) {
 
-	std::cout << immune << " " << grounded << std::endl;
-
 	//slowly rotates through [0,1):
 	// (will be used to set background color)
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
-
-	if (grounded && immune) immune = false;
 
 	{ //handle player collisions with walls
 		for (auto w = walls_at.begin(); w < walls_at.end(); w++)
@@ -241,14 +235,10 @@ void PlayMode::update(float elapsed) {
 		{
 			unsigned player_at_floor_x = (int)floor(player_at.x);
 			unsigned player_at_floor_y = (int)floor(player_at.y);
-			if (!immune && player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
+			if (player_at_floor_y - 8 + 1 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
 			{ //collides above
 				resetPlayer();
 				player_velocity.y = 0;
-			}
-			else if (player_at_floor_y + 8 == (*s).y && (*s).x - 7 <= player_at_floor_x && player_at_floor_x <= (*s).x + 7)
-			{ //collides below
-				immune = true;
 			}
 		}
 	}
@@ -326,15 +316,22 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	size_t offset2 = offset1 + walls_at.size();
 	//some other misc sprites:
-	for (size_t i = offset2; i < 63; ++i) {
+	/*for (size_t i = offset2; i < 63; ++i) {
 		float amt = (i + 2.0f * background_fade) / 62.0f;
 		ppu.sprites[i].x = int32_t(0.5f * PPU466::ScreenWidth + std::cos( 2.0f * M_PI * amt * 5.0f + 0.01f * player_at.x) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].y = int32_t(0.5f * PPU466::ScreenHeight + std::sin( 2.0f * M_PI * amt * 3.0f + 0.01f * player_at.y) * 0.4f * PPU466::ScreenWidth);
 		ppu.sprites[i].index = 32;
 		ppu.sprites[i].attributes = 6;
 		if (i % 2) ppu.sprites[i].attributes |= 0x80; //'behind' bit
+	}*/
+	size_t offset3 = offset2;
+	assert(spikes_at.size() > 0);
+	for (size_t s = 0; s < spikes_at.size(); s++) {
+		ppu.sprites[s + offset3].x = int32_t(spikes_at[s].x);
+		ppu.sprites[s + offset3].y = int32_t(spikes_at[s].y);
+		ppu.sprites[s + offset3].index = 2;
+		ppu.sprites[s + offset3].attributes = 2;
 	}
-
 	//--- actually draw ---
 	ppu.draw(drawable_size);
 }

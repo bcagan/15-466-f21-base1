@@ -38,7 +38,6 @@ struct PlayMode : Mode {
 	float jump_speed = 60.0f;
 	bool jumping = false;
 	bool grounded = false;
-	bool immune;
 	glm::vec2 initPos = glm::vec2(0.0f);
 
 	// walls and spikes
