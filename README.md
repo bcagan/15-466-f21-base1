@@ -6,7 +6,7 @@ Design: Traverse a dangerous mountain, avoiding the spikes and falls along the w
 
 Screen Shot:
 
-![Screen Shot](screenshot2.png)
+![Screen Shot](screenshot3.png)
 
 How Your Asset Pipeline Works:
 
