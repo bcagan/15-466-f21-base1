@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <deque>
+#include "ObjectTypes.hpp"
 
 /*
  *
@@ -44,14 +45,7 @@ struct PlayMode : Mode {
 	glm::vec2 player_at = glm::vec2(0.0f);
 	std::vector<glm::vec2> walls_at = std::vector<glm::vec2>(SPRITES_MAX);
 	std::vector<glm::vec2> lights_at = std::vector<glm::vec2>(SPRITES_MAX);
-
-	enum LightType 
-	{
-		POINT = 0,
-		SPOT = 1,
-	};
-
-	std::vector<LightType> lights_type = std::vector<LightType>(SPRITES_MAX);
+	std::vector<std::string> lights_type = std::vector<std::string>(SPRITES_MAX); //Fill in with light type strings we want to use
 	
 	//Can we also have a vector the same size as lights_at which indicates the light type? Could be a Light object reference
 
@@ -91,20 +85,19 @@ struct PlayMode : Mode {
 
 
 	//Lighting
+	ObjectTypes LightTypeInd = ObjectTypes();
 	std::array<std::array< std::array< glm::u8vec4, 4>, PPU466::BackgroundWidth* PPU466::BackgroundHeight>
 		, 3> backgroundColors; //0 = dark, 1 = partially lit, 2 = lit, each an array of pallets
 	//Each object should have 3 pallets stored with it, which are swapped out depending on its lighting value.
 	uint8_t whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta);
 	void updatePallet();
-	void updateLightLevels();
-	//std::vector<light_object_type> lights;
-	//Need to define a light object type which has at a minimum: pos, inner, outer (vec2, float, float)
+	uint8_t updateLightLevel(size_t objInd);
 
 
 	//----- drawing handled by PPU466 -----
 	PPU466 ppu;
 	//current background
-	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
+	std::array< TileRef, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_bg;
 	std::array< TileAssetData, PPU466::BackgroundWidth* PPU466::BackgroundHeight > curr_level;
 	unsigned default_wall_tile = 35;
 	unsigned default_light_tile = 36;

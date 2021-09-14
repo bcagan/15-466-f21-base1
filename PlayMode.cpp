@@ -183,6 +183,13 @@ PlayMode::PlayMode() {
 		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
 	};
 
+	//testing lighting
+	ppu.palette_table[2] = {
+		glm::u8vec4(0x00, 0x00, 0xff, 0xff),
+		glm::u8vec4(0x00, 0x00, 0xff, 0xff),
+		glm::u8vec4(0x00, 0x00, 0xff, 0xff),
+		glm::u8vec4(0x00, 0x00, 0xff, 0xff), };
+
 	//used for the player:
 	ppu.palette_table[7] = {
 		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
@@ -373,6 +380,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 //Lighting
 
+//End goal is to use the following but may not have time to test. For now will use more basic but still viable method (testing center only)
+
 //Checks if object is with in outer or inner range of spotlight, and gives lighting value accordingly
 /*uint8_t PlayMode::whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta) {
 	if (objPos.y + 4.f > lightPos.y) return 0;
@@ -458,42 +467,55 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	float innerVal = 2.0f*getVal(lightPos, objPos, innerTheta);
 	float outerVal = getVal(lightPos, objPos, outerTheta) - innerVal/2;
-	return roundf(innerVal + outerVal);
+	return (uint8_t) roundf(innerVal + outerVal);
+}*/
+
+//More basic version of above for testing/if cant test ^^^ in time
+uint8_t PlayMode::whichLight(glm::vec2 lightPos, glm::vec2 objPos, float innerTheta, float outerTheta) {
+	//If above, don't render as lit
+	if (objPos.y >= lightPos.y) return 0;
+	//First check inner occlusion
+	float xRange = (lightPos.y - objPos.y) / tan(innerTheta);
+	if (fabs(lightPos.x - objPos.x) <= xRange) return 2;
+	//Then check outer occlusion
+	xRange = (lightPos.y - objPos.y) / tan(outerTheta);
+	if (fabs(lightPos.x - objPos.x) <= xRange) return 1;
+	return 0;
 }
 
-
-
-
-//x,y, in [256,240]
 void PlayMode::updatePallet() {
 	for (size_t x = 0; x < PPU466::BackgroundWidth; x++) {
 		for (size_t y = 0; y < PPU466::BackgroundHeight; y++) {
 			glm::vec2 objPos = glm::vec2((float)(x * 8 + 4), (float)(y * 8 + 4));
 			uint8_t lightVal = 0;
-			for (size_t whichLight = 0; whichLight < lights_at.size(); whichLight++) {
-				uint8_t tempVal = whichLight(lights_at[whichLight], objPos, lights_object[whichLight].inner, lights_object[whichLight].outer);
+			for (size_t lightInd = 0; lightInd < lights_at.size(); lightInd++) {
+				uint8_t tempVal = whichLight(lights_at[lightInd], objPos, (LightTypeInd.getObj(lights_type[lightInd])).inner, 
+					(LightTypeInd.getObj(lights_type[lightInd])).outer);
 				if (tempVal > lightVal) lightVal = tempVal;
 			}
 			size_t ind = y * PPU466::BackgroundWidth + x;
-			curr_bg.pallets[ind] = backgroundColors[lightVal][ind];
+			curr_bg[ind].pallet = backgroundColors[lightVal][ind]; 
 		}
 	}
 }
-*/
+
 
 //x,y, in [256,240]
-/*void PlayMode::updateLightLevels() {
-	for (size_t objInd = 0; objInd < light_levels.size(); objInd++) {
-		glm::vec2 objPos = glm::vec2((sprits[objInd]).x + 4.f, (sprites[objInd]).y + 4.f);
-		uint8_t lightVal = 0;
-		for (size_t whichLight = 0; whichLight < lights.size(); whichLight++) {
-			uint8_t tempVal = whichLight(lights[whichLight].pos, objPos, lights[whichLight].inner, lights[whichLight].outer);
-			if (tempVal > lightVal) lightVal = tempVal;
-		}
-		lightLevels[ind] = lightVal;
+uint8_t PlayMode::updateLightLevel(size_t objInd) {
+	uint8_t lightVal = 0;
+	for (size_t lightInd = 0; lightInd < lights_at.size(); lightInd++) {
+		uint8_t tempVal = whichLight(glm::vec2((float)((lights_at[lightInd]).x + 4.f), (float)((lights_at[lightInd]).y + 4.f)),
+			glm::vec2((float)((walls_at[objInd]).x + 4.f),(float)((walls_at[objInd]).y + 4.f)),
+			(LightTypeInd.getObj( /*lights_type[lightInd]*/"light1")).inner, (LightTypeInd.getObj(/*lights_type[whichLight]*/"light1")).outer);
+		if (tempVal > lightVal) lightVal = tempVal;
 	}
+	std::array<uint8_t, 3> wallPalletes;
+	wallPalletes[0] = 0;//dark
+	wallPalletes[1] = 1;//partially lit
+	wallPalletes[2] = 2;//lit
+	return wallPalletes[lightVal];
 }
-*/
+
 
 void PlayMode::level_complete()
 {
@@ -511,6 +533,7 @@ void PlayMode::draw_gameplay()
 	//curr_bg = atlas.getBG("Default").tiles;
 
 	//background color will be some hsv-like fade:
+	//To be replaced with current background
 	ppu.background_color = glm::u8vec4(
 		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 0.0f / 3.0f) ) ) ))),
 		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 1.0f / 3.0f) ) ) ))),
@@ -541,25 +564,25 @@ void PlayMode::draw_gameplay()
 	ppu.sprites[1].x = int32_t(goal_at.x);
 	ppu.sprites[1].y = int32_t(goal_at.y);
 	ppu.sprites[1].index = goal_sprite_index;
-	ppu.sprites[1].attributes = 7;
+	ppu.sprites[1].attributes = 7; 
 
 	//platforms and walls
 	int i;
 	for (i = 2; i < walls_at.size() + 2; i++)
 	{
-		ppu.sprites[i].x = walls_at[i - 2].x;
-		ppu.sprites[i].y = walls_at[i - 2].y;
+		(ppu.sprites[i]).x = (uint8_t)(walls_at[i - 2]).x;
+		(ppu.sprites[i]).y = (uint8_t)(walls_at[i - 2]).y;
 		ppu.sprites[i].index = default_wall_tile;
-		ppu.sprites[i].attributes = default_wall_pallete;
+		ppu.sprites[i].attributes = updateLightLevel(i-2);
 	}
 
 	//lights
 	for (int j = i; j < i + lights_at.size(); j++)
 	{
-		ppu.sprites[j].x = lights_at[j - i].x;
-		ppu.sprites[j].y = walls_at[j - i].y;
+		ppu.sprites[j].x = (uint8_t)lights_at[j - i].x;
+		ppu.sprites[j].y = (uint8_t)walls_at[j - i].y;
 		ppu.sprites[j].index = default_light_tile;
-		ppu.sprites[j].attributes = default_wall_pallete;
+		ppu.sprites[j].attributes = default_wall_pallete; 
 	}
 	
 	//some other misc sprites:
