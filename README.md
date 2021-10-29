@@ -16,7 +16,8 @@ How To Play:
 
 Arrow keys to move left and right, space to jump! Try to get as high as you can without dying to the spikes.
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: Base Code
+
 
 This game was built with [NEST](NEST.md).
 
